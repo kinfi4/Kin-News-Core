@@ -1,6 +1,6 @@
-class CoreException(Exception):
+class KinNewsCoreException(Exception):
     pass
 
 
-class InvalidChannelURLError(Exception):
+class InvalidChannelURLError(KinNewsCoreException):
     pass
