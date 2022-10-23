@@ -5,6 +5,7 @@ from typing import Optional
 from telethon import TelegramClient
 from telethon.tl.custom.message import Message
 from telethon.tl.types import Channel
+from telethon.sessions import StringSession
 from telethon import functions
 
 from kin_news_core.exceptions import InvalidChannelURLError
@@ -49,7 +50,7 @@ class TelegramClientProxy(ITelegramProxy):
         offset_date: Optional[datetime] = None,
         earliest_date: Optional[datetime] = None,
     ) -> list[MessageEntity]:
-        self._logger.debug(f'[TelegramProxy] Fetching data from {channel_link}')
+        self._logger.info(f'[TelegramProxy] Fetching data from {channel_link}')
 
         channel, _, _ = await self._get_channel_entity_info(channel_link)
         messages_to_return = []
@@ -81,7 +82,6 @@ class TelegramClientProxy(ITelegramProxy):
         )
 
     @classmethod
-    def from_api_config(cls, api_id: int, api_hash: str) -> "TelegramClientProxy":
-        client = TelegramClient('session-1', api_id, api_hash)
-
+    def from_api_config(cls, session_sting: str, api_id: int, api_hash: str) -> "TelegramClientProxy":
+        client = TelegramClient(StringSession(session_sting), api_id, api_hash)
         return cls(telegram_client=client)

@@ -1,12 +1,6 @@
 from string import Template
 
 
-def compose_channel_link(channel_name: str) -> str:
-    link_template = Template('https://t.me/${channel_name}')
-
-    return link_template.substitute(channel_name=channel_name)
-
-
 def compose_message_link(channel_name: str, message_id: int) -> str:
     link_template = Template('https://t.me/${channel_name}/${message_id}')
 
