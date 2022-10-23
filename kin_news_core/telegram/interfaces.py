@@ -2,14 +2,14 @@ from typing import Optional
 from datetime import datetime
 from abc import ABC, abstractmethod
 
-from kin_news_core.telegram.entities import ChannelLink, MessageEntity, ChannelEntity
+from kin_news_core.telegram.entities import MessageEntity, ChannelEntity
 
 
 class ITelegramProxy(ABC):
     @abstractmethod
     def fetch_posts_from_channel(
         self,
-        channel_name: ChannelLink,
+        channel_name: str,
         *,
         offset_date: Optional[datetime] = None,
         earliest_date: Optional[datetime] = None,
@@ -17,5 +17,5 @@ class ITelegramProxy(ABC):
         pass
 
     @abstractmethod
-    def get_channel(self, channel_link: ChannelLink) -> ChannelEntity:
+    def get_channel(self, channel_link: str) -> ChannelEntity:
         pass

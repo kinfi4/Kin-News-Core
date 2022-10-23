@@ -1,16 +1,11 @@
-from typing import NewType
-
 from pydantic import BaseModel, Field
 from telethon.tl.types import Channel
 
 from kin_news_core.telegram.utils import compose_participants_count
 
 
-ChannelLink = NewType('ChannelLink', str)
-
-
 class ChannelEntity(BaseModel):
-    link: ChannelLink
+    link: str
     title: str
     description: str
     participants_count: str = Field(..., alias='subscribersNumber')

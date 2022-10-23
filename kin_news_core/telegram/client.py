@@ -11,7 +11,7 @@ from telethon.sessions import StringSession
 from telethon import functions
 
 from kin_news_core.exceptions import InvalidChannelURLError
-from kin_news_core.telegram.entities import MessageEntity, ChannelEntity, ChannelLink
+from kin_news_core.telegram.entities import MessageEntity, ChannelEntity
 from kin_news_core.constants import MESSAGES_LIMIT_FOR_ONE_CALL
 from kin_news_core.telegram.interfaces import ITelegramProxy
 
@@ -30,7 +30,7 @@ class TelegramClientProxy(ITelegramProxy):
 
     def fetch_posts_from_channel(
         self,
-        channel_name: ChannelLink,
+        channel_name: str,
         *,
         offset_date: Optional[datetime] = None,
         earliest_date: Optional[datetime] = None,
@@ -44,7 +44,9 @@ class TelegramClientProxy(ITelegramProxy):
                 )
             )
 
-    def get_channel(self, channel_link: ChannelLink) -> ChannelEntity:
+    def get_channel(self, channel_link: str) -> ChannelEntity:
+        self._logger.info(f'[TelegramClientProxy] Getting information for channel: {channel_link}')
+
         with self._client:
             channel, about, participants_count = self._client.loop.run_until_complete(
                 self._get_channel_entity_info(channel_link)
@@ -52,9 +54,18 @@ class TelegramClientProxy(ITelegramProxy):
 
         return ChannelEntity.from_telegram_obj(channel, about, participants_count)
 
+    def download_channel_profile_photo(self, channel_link: str, path_to_save: str) -> None:
+        with self._client:
+            self._client.loop.run_until_complete(self._download_channel_profile_photo(
+                channel_link, path_to_save
+            ))
+
+    async def _download_channel_profile_photo(self, channel_link: str, path_to_save: str) -> None:
+        await self._client.download_profile_photo(channel_link, file=path_to_save)
+
     async def _fetch_posts(
         self,
-        channel_link: ChannelLink,
+        channel_link: str,
         *,
         offset_date: Optional[datetime] = None,
         earliest_date: Optional[datetime] = None,
@@ -77,7 +88,7 @@ class TelegramClientProxy(ITelegramProxy):
 
         return [MessageEntity.from_telegram_obj(msg) for msg in messages_to_return]
 
-    async def _get_channel_entity_info(self, channel_link: ChannelLink) -> tuple[Channel, str, int]:
+    async def _get_channel_entity_info(self, channel_link: str) -> tuple[Channel, str, int]:
         try:
             channel_full_obj = await self._client(functions.channels.GetFullChannelRequest(channel=channel_link))
         except ValueError as err:
