@@ -5,6 +5,9 @@
 __pycache__
 db.sqlite3
 
+kin_news_core/run.py
+*.session
+
 #static
 django_static/
 # Logs
