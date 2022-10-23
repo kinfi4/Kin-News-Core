@@ -1,6 +1,8 @@
+import asyncio
 import logging
 from datetime import datetime
 from typing import Optional
+from asyncio.events import AbstractEventLoop
 
 from telethon import TelegramClient
 from telethon.tl.custom.message import Message
@@ -12,6 +14,13 @@ from kin_news_core.exceptions import InvalidChannelURLError
 from kin_news_core.telegram.entities import MessageEntity, ChannelEntity, ChannelLink
 from kin_news_core.constants import MESSAGES_LIMIT_FOR_ONE_CALL
 from kin_news_core.telegram.interfaces import ITelegramProxy
+
+
+def telegram_client_proxy_creator(session_sting: str, api_id: int, api_hash: str) -> "TelegramClientProxy":
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    return TelegramClientProxy.from_api_config(session_sting, api_id, api_hash, loop)
 
 
 class TelegramClientProxy(ITelegramProxy):
@@ -82,6 +91,7 @@ class TelegramClientProxy(ITelegramProxy):
         )
 
     @classmethod
-    def from_api_config(cls, session_sting: str, api_id: int, api_hash: str) -> "TelegramClientProxy":
-        client = TelegramClient(StringSession(session_sting), api_id, api_hash)
+    def from_api_config(cls, session_sting: str, api_id: int, api_hash: str, loop: Optional[AbstractEventLoop] = None) -> "TelegramClientProxy":
+        client = TelegramClient(StringSession(session_sting), api_id, api_hash, loop=loop)
+
         return cls(telegram_client=client)
