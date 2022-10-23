@@ -35,7 +35,7 @@ class RedisCache(AbstractCache):
     def get_channel_photo_url(self, channel_link: str) -> Optional[str]:
         self._logger.info(f'[RedisCache] Getting cache info for channel photo: {channel_link}')
 
-        return self._redis_photo_client.get(name=channel_link)
+        return self._redis_photo_client.get(name=channel_link).decode()
 
     def set_channel_photo_url(self, channel_link: str, photo_url: str) -> None:
         self._logger.info(f'[RedisCache] Set cache info for channel photo: {channel_link}')

@@ -61,7 +61,11 @@ class TelegramClientProxy(ITelegramProxy):
             ))
 
     async def _download_channel_profile_photo(self, channel_link: str, path_to_save: str) -> None:
-        await self._client.download_profile_photo(channel_link, file=path_to_save)
+        try:
+            await self._client.download_profile_photo(channel_link, file=path_to_save)
+        except ValueError as err:
+            self._logger.warning(f'Impossible to find channel for {channel_link}, with error: {str(err)}')
+            raise InvalidChannelURLError(f'Channel link {channel_link} is invalid, or channel with this name does not exists')
 
     async def _fetch_posts(
         self,
