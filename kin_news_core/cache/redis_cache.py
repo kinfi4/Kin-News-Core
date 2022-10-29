@@ -5,7 +5,7 @@ from typing import Optional
 from redis import Redis
 
 from kin_news_core.cache.interfaces import AbstractCache
-from kin_news_core.telegram.entities import ChannelEntity
+from kin_news_core.telegram.entities import TelegramChannelEntity
 
 
 class RedisCache(AbstractCache):
@@ -15,29 +15,28 @@ class RedisCache(AbstractCache):
 
         self._logger = logging.getLogger(self.__class__.__name__)
 
-    def get_channel_info(self, channel_link: str) -> Optional[ChannelEntity]:
-        self._logger.info(f'[RedisCache] Getting cache info for channel: {channel_link}')
-
+    def get_channel_info(self, channel_link: str) -> Optional[TelegramChannelEntity]:
         encoded_channel = self._redis_channel_client.get(name=channel_link)
         if encoded_channel is None:  # that means that we don't have this in cache
             return None
 
         decoded_channel_dict = pickle.loads(encoded_channel)
 
-        return ChannelEntity(**decoded_channel_dict)
+        self._logger.info(f'[RedisCache] Getting cache info for channel: {channel_link}')
+        return TelegramChannelEntity(**decoded_channel_dict)
 
-    def set_channel_info(self, channel: ChannelEntity) -> None:
+    def set_channel_info(self, channel: TelegramChannelEntity) -> None:
         self._logger.info(f'[RedisCache] Set cache info for channel: {channel.link}')
 
         encoded_channel = pickle.dumps(channel.dict())
         self._redis_channel_client.set(name=channel.link, value=encoded_channel)
 
     def get_channel_photo_url(self, channel_link: str) -> Optional[str]:
-        self._logger.info(f'[RedisCache] Getting cache info for channel photo: {channel_link}')
 
         photo_url = self._redis_photo_client.get(name=channel_link)
 
         if photo_url is not None:
+            self._logger.info(f'[RedisCache] Getting cache info for channel photo: {channel_link}')
             return photo_url.decode()
 
     def set_channel_photo_url(self, channel_link: str, photo_url: str) -> None:

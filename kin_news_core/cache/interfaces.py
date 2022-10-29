@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 
-from kin_news_core.telegram.entities import ChannelEntity
+from kin_news_core.telegram.entities import TelegramChannelEntity
 
 
 class AbstractCache(ABC):
     @abstractmethod
-    def get_channel_info(self, channel_link: str) -> ChannelEntity:
+    def get_channel_info(self, channel_link: str) -> TelegramChannelEntity:
         pass
 
     @abstractmethod
@@ -13,7 +13,7 @@ class AbstractCache(ABC):
         pass
 
     @abstractmethod
-    def set_channel_info(self, channel: ChannelEntity) -> None:
+    def set_channel_info(self, channel: TelegramChannelEntity) -> None:
         pass
 
     @abstractmethod

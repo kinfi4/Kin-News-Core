@@ -1,2 +1,2 @@
-from .message import MessageEntity
-from .channel import ChannelEntity
+from .message import TelegramMessageEntity
+from .channel import TelegramChannelEntity
