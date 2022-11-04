@@ -4,3 +4,7 @@ class KinNewsCoreException(Exception):
 
 class InvalidChannelURLError(KinNewsCoreException):
     pass
+
+
+class AccessForbidden(KinNewsCoreException):
+    pass
