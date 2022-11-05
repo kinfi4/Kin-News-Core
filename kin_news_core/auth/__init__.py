@@ -1,1 +1,1 @@
-from .auth import JWTAuthentication, create_jwt_token
+from .jwt import JWTAuthentication, create_jwt_token

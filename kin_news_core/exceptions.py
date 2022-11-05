@@ -8,3 +8,7 @@ class InvalidChannelURLError(KinNewsCoreException):
 
 class AccessForbidden(KinNewsCoreException):
     pass
+
+
+class ServiceProxyError(KinNewsCoreException):
+    pass

@@ -8,6 +8,8 @@ from rest_framework.authentication import BaseAuthentication, get_authorization_
 from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated
 from rest_framework.request import Request
 
+from kin_news_core.constants import JWT_PREFIX
+
 
 class JWTAuthentication(BaseAuthentication):
     def authenticate(self, request: Request):
@@ -18,7 +20,7 @@ class JWTAuthentication(BaseAuthentication):
 
         if not token_header:
             raise NotAuthenticated('Provide authentication header')
-        if token_header[0].lower() != b'token':
+        if token_header[0].decode('utf-8').lower() != JWT_PREFIX:
             raise AuthenticationFailed('Invalid authentication token provided')
         if len(token_header) >= 3:
             raise AuthenticationFailed(detail='Authentication header has spaces')
@@ -39,7 +41,7 @@ class JWTAuthentication(BaseAuthentication):
             raise AuthenticationFailed('Authentication token expired')
 
         try:
-            return User.objects.get(pk=decoded_token['user_id'])
+            return User.objects.get(username=decoded_token['username'])
         except ObjectDoesNotExist:
             raise AuthenticationFailed('User for provided token does not exists')
 
