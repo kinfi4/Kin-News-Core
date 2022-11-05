@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Optional
 
 import requests
@@ -12,6 +13,8 @@ class ServiceProxy:
         if not jwt_token and not kin_token:
             raise ValueError('ServiceProxy has to get at least on of jwt or kin tokens!')
 
+        self._logger = logging.getLogger(self.__class__.__name__)
+
         self._jwt_token = jwt_token
         self._kin_token = kin_token
 
@@ -19,22 +22,26 @@ class ServiceProxy:
         self._set_authentication_headers()
 
     def post(self, url: str, data: dict[str, Any]) -> dict[str, Any]:
-        response = self._session.post(url, data=data, verify=False)
+        response = self._session.post(url, data=data)
 
         if not response.ok:
+            try:
+                message = response.json()
+            except JSONDecodeError:
+                message = response.text
+
+            self._logger.error(f'Request to {url} failed with status: {response.status_code} with message: {message}')
             raise ServiceProxyError(f'Request to {url} failed with status: {response.status_code}')
 
-        try:
-            return response.json()
-        except JSONDecodeError:
-            raise ServiceProxyError(f'Request to {url} returned not a valid json with message: {response.text}')
+        return response.json()
 
     def _set_authentication_headers(self) -> None:
         if self._kin_token:
             self._session.headers.update({
-                'HTTP_AUTHORIZATION': f'{KIN_TOKEN_PREFIX} {self._kin_token}'
+                'Authorization': f'{KIN_TOKEN_PREFIX} {self._kin_token}'
             })
+            return
 
         self._session.headers.update({
-            'HTTP_AUTHORIZATION': f'{JWT_PREFIX} {self._jwt_token}'
+            'Authorization': f'{JWT_PREFIX} {self._jwt_token}'
         })
