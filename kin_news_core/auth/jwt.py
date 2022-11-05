@@ -46,11 +46,11 @@ class JWTAuthentication(BaseAuthentication):
             raise AuthenticationFailed('User for provided token does not exists')
 
 
-def create_jwt_token(user_id) -> str:
+def create_jwt_token(username) -> str:
     token_duration = timedelta(minutes=settings.TOKEN_LIFE_MINUTES)
     token_expiration_time = datetime.utcnow() + token_duration
 
-    to_encode = {'user_id': user_id, 'exp': token_expiration_time, 'sub': 'access'}
+    to_encode = {'username': username, 'exp': token_expiration_time, 'sub': 'access'}
 
     encoded_token = jwt.encode(to_encode, algorithm='HS256', key=settings.SECRET_KEY)
 
