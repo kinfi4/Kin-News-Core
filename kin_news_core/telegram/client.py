@@ -15,6 +15,9 @@ from kin_news_core.constants import MESSAGES_LIMIT_FOR_ONE_CALL
 from kin_news_core.telegram.interfaces import ITelegramProxy
 
 
+logging.getLogger('telethon').setLevel(logging.ERROR)
+
+
 class TelegramClientProxy(ITelegramProxy):
     def __init__(self, session_str: str, api_id: int, api_hash: str) -> None:
         self._session_obj = StringSession(session_str)
