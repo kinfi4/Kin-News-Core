@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, Field
 from telethon.tl.custom.message import Message
@@ -7,7 +8,7 @@ from kin_news_core.telegram.utils import compose_message_link
 
 
 class TelegramMessageEntity(BaseModel):
-    text: str
+    text: Optional[str] = Field(None)
     channel_title: str = Field(..., alias='channelTitle')
     message_link: str = Field(..., alias='messageLink')
     created_at: datetime = Field(..., alias='createdAt')

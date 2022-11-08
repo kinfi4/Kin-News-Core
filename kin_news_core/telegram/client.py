@@ -30,6 +30,7 @@ class TelegramClientProxy(ITelegramProxy):
         *,
         offset_date: Optional[datetime] = None,
         earliest_date: Optional[datetime] = None,
+        skip_messages_without_text: bool = False,
     ) -> list[TelegramMessageEntity]:
         self._client = self._initialize_client()
         with self._client:
@@ -37,7 +38,8 @@ class TelegramClientProxy(ITelegramProxy):
                 self._fetch_posts(
                     channel_name,
                     offset_date=offset_date,
-                    earliest_date=earliest_date
+                    earliest_date=earliest_date,
+                    skip_messages_without_text=skip_messages_without_text,
                 )
             )
 
@@ -72,6 +74,7 @@ class TelegramClientProxy(ITelegramProxy):
         *,
         offset_date: Optional[datetime] = None,
         earliest_date: Optional[datetime] = None,
+        skip_messages_without_text: bool = False,
     ) -> list[TelegramMessageEntity]:
         self._logger.info(f'[TelegramProxy] Fetching data from {channel_link}')
 
@@ -79,7 +82,14 @@ class TelegramClientProxy(ITelegramProxy):
         messages_to_return = []
 
         message: Message
-        async for message in self._client.iter_messages(channel, offset_date=offset_date, limit=MESSAGES_LIMIT_FOR_ONE_CALL):
+        async for message in self._client.iter_messages(
+            channel,
+            offset_date=offset_date,
+            limit=MESSAGES_LIMIT_FOR_ONE_CALL,
+        ):
+            if skip_messages_without_text and not message.text:
+                continue
+
             local = datetime.now().tzinfo
             post_local_date = message.date.astimezone(tz=local)
             post_local_date = datetime.fromtimestamp(post_local_date.timestamp())

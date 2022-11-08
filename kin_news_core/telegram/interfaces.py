@@ -13,6 +13,7 @@ class ITelegramProxy(ABC):
         *,
         offset_date: Optional[datetime] = None,
         earliest_date: Optional[datetime] = None,
+        skip_messages_without_text: bool = False,
     ) -> list[TelegramMessageEntity]:
         pass
 
