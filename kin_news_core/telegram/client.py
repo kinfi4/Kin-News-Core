@@ -4,12 +4,13 @@ from datetime import datetime
 from typing import Optional
 
 from telethon import TelegramClient
+from telethon.errors import FloodWaitError
 from telethon.tl.custom.message import Message
 from telethon.tl.types import Channel
 from telethon.sessions import StringSession
 from telethon import functions
 
-from kin_news_core.exceptions import InvalidChannelURLError
+from kin_news_core.exceptions import InvalidChannelURLError, TelegramIsUnavailable
 from kin_news_core.telegram.entities import TelegramMessageEntity, TelegramChannelEntity
 from kin_news_core.constants import MESSAGES_LIMIT_FOR_ONE_CALL
 from kin_news_core.telegram.interfaces import ITelegramProxy
@@ -37,14 +38,18 @@ class TelegramClientProxy(ITelegramProxy):
     ) -> list[TelegramMessageEntity]:
         self._client = self._initialize_client()
         with self._client:
-            return self._client.loop.run_until_complete(
-                self._fetch_posts(
-                    channel_name,
-                    offset_date=offset_date,
-                    earliest_date=earliest_date,
-                    skip_messages_without_text=skip_messages_without_text,
+            try:
+                return self._client.loop.run_until_complete(
+                    self._fetch_posts(
+                        channel_name,
+                        offset_date=offset_date,
+                        earliest_date=earliest_date,
+                        skip_messages_without_text=skip_messages_without_text,
+                    )
                 )
-            )
+            except FloodWaitError as error:
+                self._logger.error(f"Telegram flood happened, backoff: {error.seconds}")
+                raise TelegramIsUnavailable("Telegram flooded!", seconds=error.seconds)
 
     def get_channel(self, channel_link: str) -> TelegramChannelEntity:
         self._logger.info(f'[TelegramClientProxy] Getting information for channel: {channel_link}')
