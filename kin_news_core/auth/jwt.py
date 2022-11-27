@@ -36,6 +36,8 @@ class JWTAuthentication(BaseAuthentication):
             decoded_token = jwt.decode(token, algorithms='HS256', key=settings.SECRET_KEY)
         except jwt.DecodeError:
             raise AuthenticationFailed('Invalid symbols passed in auth token')
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Authentication token expired')
 
         if datetime.utcnow() > datetime.fromtimestamp(decoded_token['exp']):
             raise AuthenticationFailed('Authentication token expired')
