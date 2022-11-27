@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.models import User
-from rest_framework.authentication import BaseAuthentication, get_authorization_header
-from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated
+from rest_framework.authentication import BaseAuthentication
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.request import Request
 
 
@@ -12,7 +12,7 @@ class KinTokenAuthentication(BaseAuthentication):
         if kin_token != settings.KIN_TOKEN:
             raise AuthenticationFailed('Invalid authentication token provided')
 
-        return User.objects.get(username='root'), None
+        return User(), None
 
     @staticmethod
     def _decode_token_from_header(token_header: tuple[bytes, bytes]) -> str:
