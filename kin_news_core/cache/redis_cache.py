@@ -45,8 +45,16 @@ class RedisCache(AbstractCache):
         self._redis_photo_client.set(name=channel_link, value=photo_url)
 
     @classmethod
-    def from_settings(cls, hostname: str, port: int = 6379, password: Optional[str] = None):
-        redis_photo_client = Redis(host=hostname, port=port, password=password, db=0)
-        redis_channel_client = Redis(host=hostname, port=port, password=password, db=1)
+    def from_settings(
+        cls,
+        hostname: str,
+        port: int = 6379,
+        password: Optional[str] = None,
+        *,
+        photo_db_name: int = 0,
+        channel_db_name: int = 1,
+    ) -> "RedisCache":
+        redis_photo_client = Redis(host=hostname, port=port, password=password, db=photo_db_name)
+        redis_channel_client = Redis(host=hostname, port=port, password=password, db=channel_db_name)
 
         return cls(redis_channel_client, redis_photo_client)

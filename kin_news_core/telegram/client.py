@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional
 
 from telethon import TelegramClient
-from telethon.errors import FloodWaitError
+from telethon.errors import FloodWaitError, UsernameInvalidError
 from telethon.tl.custom.message import Message
 from telethon.tl.types import Channel
 from telethon.sessions import StringSession
@@ -112,7 +112,7 @@ class TelegramClientProxy(ITelegramProxy):
     async def _get_channel_entity_info(self, channel_link: str) -> tuple[Channel, str, int]:
         try:
             channel_full_obj = await self._client(functions.channels.GetFullChannelRequest(channel=channel_link))
-        except (ValueError, TypeError) as err:
+        except (ValueError, TypeError, UsernameInvalidError) as err:
             self._logger.warning(f'Impossible to find channel for {channel_link}, with error: {str(err)}')
             raise InvalidChannelURLError(f'Channel link {channel_link} is invalid, or channel with this name does not exists')
 
