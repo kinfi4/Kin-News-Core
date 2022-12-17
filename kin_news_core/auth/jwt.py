@@ -48,7 +48,7 @@ class JWTAuthentication(BaseAuthentication):
             raise AuthenticationFailed('User for provided token does not exists')
 
 
-def create_jwt_token(username) -> str:
+def create_jwt_token(username: int | str) -> str:
     token_duration = timedelta(minutes=settings.TOKEN_LIFE_MINUTES)
     token_expiration_time = datetime.utcnow() + token_duration
 
