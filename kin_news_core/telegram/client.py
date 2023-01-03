@@ -89,12 +89,16 @@ class TelegramClientProxy(ITelegramProxy):
         channel, _, _ = await self._get_channel_entity_info(channel_link)
         messages_to_return = []
 
+        previous_message: Optional[Message] = None
         message: Message
         async for message in self._client.iter_messages(
             channel,
             offset_date=offset_date,
             limit=MESSAGES_LIMIT_FOR_ONE_CALL,
         ):
+            if previous_message is not None and previous_message.date == message.date:
+                continue
+
             if skip_messages_without_text and not message.text:
                 continue
 
@@ -106,6 +110,7 @@ class TelegramClientProxy(ITelegramProxy):
                 break
 
             messages_to_return.append(message)
+            previous_message = message
 
         return [TelegramMessageEntity.from_telegram_obj(msg) for msg in messages_to_return]
 
