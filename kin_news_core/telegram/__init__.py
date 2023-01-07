@@ -1,2 +1,2 @@
-from .interfaces import ITelegramProxy
+from .interfaces import IDataGetterProxy
 from .client import TelegramClientProxy

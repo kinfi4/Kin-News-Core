@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from kin_news_core.telegram.entities import TelegramMessageEntity, TelegramChannelEntity
 
 
-class ITelegramProxy(ABC):
+class IDataGetterProxy(ABC):
     @abstractmethod
     def fetch_posts_from_channel(
         self,
