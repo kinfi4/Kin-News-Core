@@ -96,7 +96,10 @@ class TelegramClientProxy(IDataGetterProxy):
             offset_date=offset_date,
             limit=MESSAGES_LIMIT_FOR_ONE_CALL,
         ):
-            if previous_message is not None and previous_message.date == message.date:
+            if (
+                previous_message is not None
+                and (previous_message.date == message.date or previous_message.text == message.text)
+            ):
                 continue
 
             if skip_messages_without_text and not message.text:
