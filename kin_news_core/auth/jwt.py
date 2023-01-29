@@ -1,59 +1,40 @@
 from datetime import datetime, timedelta
 
 import jwt
-from django.conf import settings
-from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
-from rest_framework.authentication import BaseAuthentication, get_authorization_header
-from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated
-from rest_framework.request import Request
 
-from kin_news_core.constants import JWT_PREFIX
+from kin_news_core.exceptions import AuthenticationFailedError
+from kin_news_core.settings import CoreSettings
 
 
-class JWTAuthentication(BaseAuthentication):
-    def authenticate(self, request: Request):
-        if 'docs/' in request._request.path:  # I added this line, in order to user swagger docs without authentication
-            return User.objects.all()[0], None
+def decode_jwt_token(token: str) -> str:
+    split_token = token.split()
 
-        token_header = get_authorization_header(request).split()  # list of "Token" prefix and token value
+    if len(split_token) != 2:
+        raise AuthenticationFailedError('Invalid token format!')
+    if split_token[0].lower() != 'token':
+        raise AuthenticationFailedError('Invalid token format! Token must begin with "Token"')
 
-        if not token_header:
-            raise NotAuthenticated('Provide authentication header')
-        if token_header[0].decode('utf-8').lower() != JWT_PREFIX:
-            raise AuthenticationFailed('Invalid authentication token provided')
-        if len(token_header) >= 3:
-            raise AuthenticationFailed(detail='Authentication header has spaces')
-        if len(token_header) == 1:
-            raise AuthenticationFailed(detail='Authentication header does not contains token')
+    token_to_decode = split_token[1]
 
-        token = token_header[1].decode('utf-8')
-        return self._get_authenticated_user(token), None
+    try:
+        decoded_token = jwt.decode(token_to_decode, algorithms='HS256', key=CoreSettings().secret_key)
+    except jwt.DecodeError:
+        raise AuthenticationFailedError('Invalid symbols passed in auth token')
+    except jwt.ExpiredSignatureError:
+        raise AuthenticationFailedError('Authentication token expired')
 
-    @staticmethod
-    def _get_authenticated_user(token: str) -> User:
-        try:
-            decoded_token = jwt.decode(token, algorithms='HS256', key=settings.SECRET_KEY)
-        except jwt.DecodeError:
-            raise AuthenticationFailed('Invalid symbols passed in auth token')
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Authentication token expired')
+    if datetime.utcnow() > datetime.fromtimestamp(decoded_token['exp']):
+        raise AuthenticationFailedError('Authentication token expired')
 
-        if datetime.utcnow() > datetime.fromtimestamp(decoded_token['exp']):
-            raise AuthenticationFailed('Authentication token expired')
-
-        try:
-            return User.objects.get(username=decoded_token['username'])
-        except ObjectDoesNotExist:
-            raise AuthenticationFailed('User for provided token does not exists')
+    return decoded_token['username']
 
 
 def create_jwt_token(username: int | str) -> str:
-    token_duration = timedelta(minutes=settings.TOKEN_LIFE_MINUTES)
+    token_duration = timedelta(minutes=CoreSettings().token_life_minutes)
     token_expiration_time = datetime.utcnow() + token_duration
 
     to_encode = {'username': username, 'exp': token_expiration_time, 'sub': 'access'}
 
-    encoded_token = jwt.encode(to_encode, algorithm='HS256', key=settings.SECRET_KEY)
+    encoded_token = jwt.encode(to_encode, algorithm='HS256', key=CoreSettings().secret_key)
 
     return encoded_token

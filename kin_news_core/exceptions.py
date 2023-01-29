@@ -20,3 +20,7 @@ class TelegramIsUnavailable(KinNewsCoreException):
     def __init__(self, msg: str, seconds: int):
         super().__init__(msg)
         self.seconds_to_wait = seconds
+
+
+class AuthenticationFailedError(KinNewsCoreException):
+    pass
