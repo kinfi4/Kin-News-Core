@@ -1,12 +1,12 @@
 import logging
 
-from kin_news_core.messaging.dtos.event import BasicEvent
-from kin_news_core.messaging.interfaces import AbstractEventProducer, ISerializer
-from kin_news_core.messaging.rabbit.client import RabbitClient
+from kin_news_core.messaging import AbstractEventProducer, ISerializer, BasicEvent
+from kin_news_core.messaging.common import JsonSerializer
+from kin_news_core.messaging.rabbit import RabbitClient
 
 
 class RabbitProducer(AbstractEventProducer):
-    def __init__(self, client: RabbitClient, serializer: ISerializer) -> None:
+    def __init__(self, client: RabbitClient, serializer: ISerializer = JsonSerializer()) -> None:
         self._client = client
         self._serializer = serializer
         self._logger = logging.getLogger(self.__class__.__name__)

@@ -5,7 +5,7 @@ from pika import URLParameters
 from pika.adapters.blocking_connection import BlockingChannel, BlockingConnection
 from pika.exchange_type import ExchangeType
 
-from kin_news_core.messaging.interfaces import IDeserializer
+from kin_news_core.messaging import IDeserializer
 from kin_news_core.messaging.rabbit.callback import RabbitCallbackWrapper
 from kin_news_core.messaging.common.serializers import JsonSerializer
 

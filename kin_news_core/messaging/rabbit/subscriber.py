@@ -2,19 +2,25 @@ import logging
 from typing import Callable, Type
 from functools import partial
 
+from kin_news_core.messaging.common import JsonSerializer
 from kin_news_core.messaging.dtos.event import BasicEvent
 from kin_news_core.messaging.interfaces import AbstractEventSubscriber, IDeserializer
 from kin_news_core.messaging.rabbit.client import RabbitClient
 from kin_news_core.messaging.rabbit.dtos import Subscription
 
 
+_logger = logging.getLogger('[Messaging]')
+
+
 def deserialize_and_callback(body: bytes, callback: Callable, deserializer: IDeserializer, event_class: Type[BasicEvent]):
     deserialized_event = deserializer.deserialize(event_class, body)
     callback(deserialized_event)
 
+    _logger.info(f'Event {event_class.__class__.__name__} successfully handled.')
+
 
 class RabbitSubscriber(AbstractEventSubscriber):
-    def __init__(self, client: RabbitClient, deserializer: IDeserializer) -> None:
+    def __init__(self, client: RabbitClient, deserializer: IDeserializer = JsonSerializer()) -> None:
         self._client = client
         self._deserializer = deserializer
 
