@@ -49,7 +49,7 @@ class RabbitClient:
         self.channel.queue_bind(exchange=exchange, queue=queue, routing_key=routing_key)
 
     def bind_callback_2_queue(self, queue_name: str, callback: Callable) -> None:
-        callback_wrapper = RabbitCallbackWrapper(callback, deserializer=self._deserializer)
+        callback_wrapper = RabbitCallbackWrapper(callback)
         self.channel.basic_consume(queue_name, on_message_callback=callback_wrapper)
 
     def publish_event(self, exchange: str, message: bytes | str, routing_key: str = ''):
