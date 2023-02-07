@@ -38,6 +38,10 @@ class RabbitClient:
 
         return self._channel
 
+    def reset_connection(self):
+        self._connection = None
+        self._channel = None
+
     def declare_exchange(self, exchange_name: str, exchange_type: Optional[str] = None) -> None:
         if exchange_type is None:
             exchange_type = ExchangeType.fanout.value
