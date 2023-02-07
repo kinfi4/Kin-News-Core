@@ -35,7 +35,7 @@ class RabbitSubscriber(AbstractEventSubscriber):
             deserializer=self._deserializer,
         )
 
-        self._subscriptions.append(Subscription(aggregate_type=destination, callback=callback))
+        self._subscriptions.append(Subscription(aggregate_type=destination, callback=callback, event_class=event_class))
 
     def start_consuming(self) -> None:
         self._create_subscriptions()

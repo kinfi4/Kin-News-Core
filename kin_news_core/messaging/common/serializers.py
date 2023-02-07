@@ -10,7 +10,15 @@ from kin_news_core.constants import DEFAULT_DATE_FORMAT
 
 class JsonSerializer(IDeserializer, ISerializer):
     def deserialize(self, event_class: Type[BasicEvent], data: bytes) -> BasicEvent:
-        return event_class(**json.loads(data.decode()))
+        print(json.loads(data.decode()))
+        print("EVENT INIT")
+
+        event = event_class(**json.loads(data.decode()))
+
+        print("EVENT POST INIT")
+        print(event)
+
+        return event
 
     def serialize(self, event: BasicEvent) -> bytes:
         data_to_encode = deepcopy(event.dict())

@@ -1,8 +1,10 @@
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, Type
 
 from pika.spec import Basic
 from pika.adapters.blocking_connection import BlockingChannel
+
+from kin_news_core.messaging.dtos import BasicEvent
 
 
 @dataclass()
@@ -19,4 +21,5 @@ class EventData:
 @dataclass()
 class Subscription:
     aggregate_type: str
+    event_class: Type[BasicEvent]
     callback: Callable
