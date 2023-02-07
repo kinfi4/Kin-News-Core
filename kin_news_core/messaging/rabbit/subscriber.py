@@ -15,10 +15,12 @@ _logger = logging.getLogger()
 def deserialize_and_callback(event_data: EventData, subscriptions: list[Subscription], deserializer: IDeserializer):
     for sub in subscriptions:
         if event_data.event_type == sub.event_class.__name__:
+            _logger.info(f'[RabbitSubscriber] Start handling event {sub.event_class.__name__}...')
+
             deserialized_event = deserializer.deserialize(sub.event_class, event_data.body)
             sub.callback(deserialized_event)
 
-            _logger.info(f'[RabbitSubscriber] Event {sub.event_class.__class__.__name__} successfully handled.')
+            _logger.info(f'[RabbitSubscriber] Event {sub.event_class.__name__} successfully handled.')
             return
 
     _logger.debug(f'[RabbitSubscriber] Skipping event {event_data.event_type} because there is no handler.')
