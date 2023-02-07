@@ -1,8 +1,8 @@
 import logging
 import random
-from typing import Optional, Callable
+from typing import Optional, Callable, Any
 
-from pika import URLParameters
+from pika import URLParameters, BasicProperties
 from pika.adapters.blocking_connection import BlockingChannel, BlockingConnection
 from pika.exchange_type import ExchangeType
 
@@ -55,8 +55,13 @@ class RabbitClient:
         callback_wrapper = RabbitCallbackWrapper(callback)
         self.channel.basic_consume(queue_name, on_message_callback=callback_wrapper)
 
-    def publish_event(self, exchange: str, message: bytes | str, routing_key: str = ''):
-        self.channel.basic_publish(exchange, body=message, routing_key=routing_key)
+    def publish_event(self, exchange: str, message: bytes | str, routing_key: str = '', headers: Optional[dict[str, Any]] = None):
+        self.channel.basic_publish(
+            exchange,
+            body=message,
+            routing_key=routing_key,
+            properties=BasicProperties(headers=headers),
+        )
 
     def start_consuming(self) -> None:
         self.channel.start_consuming()

@@ -15,7 +15,7 @@ class RabbitProducer(AbstractEventProducer):
     @retry_connect
     def publish(self, destination: str, events: list[BasicEvent]) -> None:
         for event in events:
-            self._logger.info(f'Publishing event: {event.__class__.__name__} to exchange: {destination}')
+            self._logger.info(f'[RabbitProducer] Publishing event: {event.__class__.__name__} to exchange: {destination}')
             serialized_event = self._serializer.serialize(event)
 
-            self._client.publish_event(destination, serialized_event)
+            self._client.publish_event(destination, serialized_event, headers={'event-type': event.__class__.__name__})

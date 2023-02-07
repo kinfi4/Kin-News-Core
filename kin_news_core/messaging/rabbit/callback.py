@@ -19,7 +19,7 @@ class RabbitCallbackWrapper:
         properties: BasicProperties,
         body: bytes,
     ) -> None:
-        event_data = EventData(method=method, channel=channel, body=body)
+        event_data = EventData(method=method, channel=channel, body=body, headers=properties.headers)
 
         try:
             self._handle_event(event_data)
@@ -27,7 +27,7 @@ class RabbitCallbackWrapper:
             self._handle_error(event_data, err)
 
     def _handle_event(self, event_data: EventData) -> None:
-        self._event_handler(body=event_data.body)
+        self._event_handler(event_data=event_data)
         event_data.channel.basic_ack(delivery_tag=event_data.delivery_tag)
 
     def _handle_error(self, event_data: EventData, exc: Exception) -> None:
