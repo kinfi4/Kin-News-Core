@@ -3,6 +3,7 @@ import logging
 from kin_news_core.messaging import AbstractEventProducer, ISerializer, BasicEvent
 from kin_news_core.messaging.common import JsonSerializer
 from kin_news_core.messaging.rabbit import RabbitClient
+from kin_news_core.messaging.rabbit.utils import retry_connect
 
 
 class RabbitProducer(AbstractEventProducer):
@@ -11,6 +12,7 @@ class RabbitProducer(AbstractEventProducer):
         self._serializer = serializer
         self._logger = logging.getLogger(self.__class__.__name__)
 
+    @retry_connect
     def publish(self, destination: str, events: list[BasicEvent]) -> None:
         for event in events:
             self._logger.info(f'Publishing event: {event.__class__.__name__} to exchange: {destination}')

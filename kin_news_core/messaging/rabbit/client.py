@@ -1,3 +1,4 @@
+import logging
 import random
 from typing import Optional, Callable
 
@@ -8,6 +9,8 @@ from pika.exchange_type import ExchangeType
 from kin_news_core.messaging import IDeserializer
 from kin_news_core.messaging.rabbit.callback import RabbitCallbackWrapper
 from kin_news_core.messaging.common.serializers import JsonSerializer
+
+logging.getLogger("pika").setLevel(logging.CRITICAL)
 
 
 class RabbitClient:

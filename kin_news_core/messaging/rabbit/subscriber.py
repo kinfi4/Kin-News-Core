@@ -7,7 +7,7 @@ from kin_news_core.messaging.dtos.event import BasicEvent
 from kin_news_core.messaging.interfaces import AbstractEventSubscriber, IDeserializer
 from kin_news_core.messaging.rabbit.client import RabbitClient
 from kin_news_core.messaging.rabbit.dtos import Subscription
-
+from kin_news_core.messaging.rabbit.utils import retry_connect
 
 _logger = logging.getLogger('[Messaging]')
 
@@ -37,6 +37,7 @@ class RabbitSubscriber(AbstractEventSubscriber):
 
         self._subscriptions.append(Subscription(aggregate_type=destination, callback=callback, event_class=event_class))
 
+    @retry_connect
     def start_consuming(self) -> None:
         self._create_subscriptions()
         self._client.start_consuming()
