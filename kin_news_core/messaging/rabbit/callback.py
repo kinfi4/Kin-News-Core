@@ -36,4 +36,4 @@ class RabbitCallbackWrapper:
             f'During handling event error {exc.__class__.__name__} occurred with message: {str(exc)}'
         )
 
-        event_data.channel.basic_nack(event_data.delivery_tag)
+        event_data.channel.basic_nack(delivery_tag=event_data.delivery_tag, requeue=False)
