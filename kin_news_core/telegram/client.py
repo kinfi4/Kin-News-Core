@@ -40,7 +40,7 @@ class TelegramClientProxy(IDataGetterProxy):
         with self._client:
             try:
                 return self._client.loop.run_until_complete(
-                    self._fetch_posts(
+                    self.fetch_posts_from_channel_async(
                         channel_name,
                         offset_date=offset_date,
                         earliest_date=earliest_date,
@@ -56,37 +56,28 @@ class TelegramClientProxy(IDataGetterProxy):
 
         self._client = self._initialize_client()
         with self._client:
-            channel, about, participants_count = self._client.loop.run_until_complete(
-                self._get_channel_entity_info(channel_link)
+            return self._client.loop.run_until_complete(
+                self.get_channel_async(channel_link)
             )
-
-        return TelegramChannelEntity.from_telegram_obj(channel, about, participants_count)
 
     def download_channel_profile_photo(self, channel_link: str, path_to_save: str) -> None:
         self._client = self._initialize_client()
         with self._client:
-            self._client.loop.run_until_complete(self._download_channel_profile_photo(
+            self._client.loop.run_until_complete(self.download_channel_profile_photo_async(
                 channel_link, path_to_save
             ))
 
-    async def _download_channel_profile_photo(self, channel_link: str, path_to_save: str) -> None:
-        try:
-            await self._client.download_profile_photo(channel_link, file=path_to_save)
-        except ValueError as err:
-            self._logger.warning(f'Impossible to find channel for {channel_link}, with error: {str(err)}')
-            raise InvalidChannelURLError(f'Channel link {channel_link} is invalid, or channel with this name does not exists')
-
-    async def _fetch_posts(
+    async def fetch_posts_from_channel_async(
         self,
-        channel_link: str,
+        channel_name: str,
         *,
         offset_date: Optional[datetime] = None,
         earliest_date: Optional[datetime] = None,
         skip_messages_without_text: bool = False,
     ) -> list[TelegramMessageEntity]:
-        self._logger.info(f'[TelegramProxy] Fetching data from {channel_link}')
+        self._logger.info(f'[TelegramProxy] Fetching data from {channel_name}')
 
-        channel, _, _ = await self._get_channel_entity_info(channel_link)
+        channel, _, _ = await self.get_channel_async(channel_name)
         messages_to_return = []
 
         previous_message: Optional[Message] = None
@@ -117,18 +108,25 @@ class TelegramClientProxy(IDataGetterProxy):
 
         return [TelegramMessageEntity.from_telegram_obj(msg) for msg in messages_to_return]
 
-    async def _get_channel_entity_info(self, channel_link: str) -> tuple[Channel, str, int]:
+    async def get_channel_async(self, channel_link: str) -> TelegramChannelEntity:
         try:
             channel_full_obj = await self._client(functions.channels.GetFullChannelRequest(channel=channel_link))
         except (ValueError, TypeError, UsernameInvalidError) as err:
             self._logger.warning(f'Impossible to find channel for {channel_link}, with error: {str(err)}')
             raise InvalidChannelURLError(f'Channel link {channel_link} is invalid, or channel with this name does not exists')
 
-        return (
+        return TelegramChannelEntity.from_telegram_obj(
             channel_full_obj.chats[0],
             channel_full_obj.full_chat.about,
             channel_full_obj.full_chat.participants_count,
         )
+
+    async def download_channel_profile_photo_async(self, channel_link: str, path_to_save: str) -> None:
+        try:
+            await self._client.download_profile_photo(channel_link, file=path_to_save)
+        except ValueError as err:
+            self._logger.warning(f'Impossible to find channel for {channel_link}, with error: {str(err)}')
+            raise InvalidChannelURLError(f'Channel link {channel_link} is invalid, or channel with this name does not exists')
 
     def _initialize_client(self) -> TelegramClient:
         loop = asyncio.new_event_loop()

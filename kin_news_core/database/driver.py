@@ -2,9 +2,6 @@ from contextlib import contextmanager
 from typing import Generator, Optional
 
 from sqlalchemy.engine import Engine, Connection, create_engine
-from sqlalchemy import MetaData
-
-metadata = MetaData()
 
 
 class Database:
@@ -50,5 +47,5 @@ class Database:
 
         return self._connection
 
-    def close(self):
+    def close(self) -> None:
         self._connection.close()

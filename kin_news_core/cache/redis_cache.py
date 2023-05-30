@@ -1,6 +1,5 @@
 import pickle
 import logging
-from typing import Optional
 
 from redis import Redis
 
@@ -15,7 +14,7 @@ class RedisCache(AbstractCache):
 
         self._logger = logging.getLogger(self.__class__.__name__)
 
-    def get_channel_info(self, channel_link: str) -> Optional[TelegramChannelEntity]:
+    def get_channel_info(self, channel_link: str) -> TelegramChannelEntity | None:
         encoded_channel = self._redis_channel_client.get(name=channel_link)
         if encoded_channel is None:  # that means that we don't have this in cache
             return None
@@ -31,8 +30,7 @@ class RedisCache(AbstractCache):
         encoded_channel = pickle.dumps(channel.dict())
         self._redis_channel_client.set(name=channel.link, value=encoded_channel)
 
-    def get_channel_photo_url(self, channel_link: str) -> Optional[str]:
-
+    def get_channel_photo_url(self, channel_link: str) -> str | None:
         photo_url = self._redis_photo_client.get(name=channel_link)
 
         if photo_url is not None:
@@ -49,7 +47,7 @@ class RedisCache(AbstractCache):
         cls,
         hostname: str,
         port: int = 6379,
-        password: Optional[str] = None,
+        password: str | None = None,
         *,
         photo_db_name: int = 0,
         channel_db_name: int = 1,
