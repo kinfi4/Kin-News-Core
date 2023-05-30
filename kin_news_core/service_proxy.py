@@ -11,7 +11,7 @@ from kin_news_core.exceptions import ServiceProxyError
 class ServiceProxy:
     def __init__(self, jwt_token: Optional[str] = None, kin_token: Optional[str] = None):
         if not jwt_token and not kin_token:
-            raise ValueError('ServiceProxy has to get at least on of jwt or kin tokens!')
+            raise ValueError("ServiceProxy has to get at least on of jwt or kin tokens!")
 
         self._logger = logging.getLogger(self.__class__.__name__)
 
@@ -30,15 +30,15 @@ class ServiceProxy:
             except JSONDecodeError:
                 message = response.text
 
-            self._logger.error(f'Request to {url} failed with status: {response.status_code} with message: {message}')
-            raise ServiceProxyError(f'Request to {url} failed with status: {response.status_code}')
+            self._logger.error(f"Request to {url} failed with status: {response.status_code} with message: {message}")
+            raise ServiceProxyError(f"Request to {url} failed with status: {response.status_code}")
 
         return response.json()
 
     def _set_authentication_headers(self) -> None:
         if self._kin_token:
             self._session.headers.update({
-                'Authorization': f'{KIN_TOKEN_PREFIX} {self._kin_token}'
+                "Authorization": f'{KIN_TOKEN_PREFIX} {self._kin_token}'
             })
             return
 

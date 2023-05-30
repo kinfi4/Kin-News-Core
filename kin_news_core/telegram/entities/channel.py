@@ -8,13 +8,13 @@ class TelegramChannelEntity(BaseModel):
     link: str
     title: str
     description: str
-    participants_count: str = Field(..., alias='subscribersNumber')
+    participants_count: str = Field(..., alias="subscribersNumber")
 
     class Config:
         allow_population_by_field_name = True
 
     @classmethod
-    def from_telegram_obj(cls, channel: Channel, about: str, participants_count: int) -> 'TelegramChannelEntity':
+    def from_telegram_obj(cls, channel: Channel, about: str, participants_count: int) -> "TelegramChannelEntity":
         return cls(
             link=channel.username,
             title=channel.title,

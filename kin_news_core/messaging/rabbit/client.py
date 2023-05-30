@@ -14,7 +14,7 @@ logging.getLogger("pika").setLevel(logging.CRITICAL)
 
 
 class RabbitClient:
-    _DLX_NAME = 'dlx-topic'
+    _DLX_NAME = "dlx-topic"
     _MIN_CHANNEL_IDX = 1
     _MAX_CHANNEL_IDX = 10000
 
@@ -59,7 +59,7 @@ class RabbitClient:
         callback_wrapper = RabbitCallbackWrapper(callback)
         self.channel.basic_consume(queue_name, on_message_callback=callback_wrapper)
 
-    def publish_event(self, exchange: str, message: bytes | str, routing_key: str = '', headers: Optional[dict[str, Any]] = None):
+    def publish_event(self, exchange: str, message: bytes | str, routing_key: str = "", headers: Optional[dict[str, Any]] = None):
         self.channel.basic_publish(
             exchange,
             body=message,
@@ -76,7 +76,7 @@ class RabbitClient:
             exchange_type=ExchangeType.topic.value,
         )
 
-        dlx_routing_key = f'{target_queue}-routing-key'
+        dlx_routing_key = f"{target_queue}-routing-key"
         dlx_queue_name = f"{target_queue}-dlx"
 
         self.channel.queue_declare(dlx_queue_name, durable=True)

@@ -2,7 +2,7 @@ from string import Template
 
 
 def compose_message_link(channel_name: str, message_id: int) -> str:
-    link_template = Template('https://t.me/${channel_name}/${message_id}')
+    link_template = Template("https://t.me/${channel_name}/${message_id}")
 
     return link_template.substitute(channel_name=channel_name, message_id=message_id)
 
@@ -12,6 +12,6 @@ def compose_participants_count(participants_number: int) -> str:
         return str(participants_number)
 
     if participants_number < 1_000_000:
-        return f'{participants_number // 1000}K'
+        return f"{participants_number // 1000}K"
 
-    return f'{round(participants_number / 1_000_000, 1)}M'
+    return f"{round(participants_number / 1_000_000, 1)}M"

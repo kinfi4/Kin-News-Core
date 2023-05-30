@@ -16,7 +16,7 @@ from kin_news_core.constants import MESSAGES_LIMIT_FOR_ONE_CALL
 from kin_news_core.telegram.interfaces import IDataGetterProxy
 
 
-logging.getLogger('telethon').setLevel(logging.ERROR)
+logging.getLogger("telethon").setLevel(logging.ERROR)
 
 
 class TelegramClientProxy(IDataGetterProxy):
@@ -52,7 +52,7 @@ class TelegramClientProxy(IDataGetterProxy):
                 raise TelegramIsUnavailable("Telegram flooded!", seconds=error.seconds)
 
     def get_channel(self, channel_link: str) -> TelegramChannelEntity:
-        self._logger.info(f'[TelegramClientProxy] Getting information for channel: {channel_link}')
+        self._logger.info(f"[TelegramClientProxy] Getting information for channel: {channel_link}")
 
         self._client = self._initialize_client()
         with self._client:
@@ -75,7 +75,7 @@ class TelegramClientProxy(IDataGetterProxy):
         earliest_date: Optional[datetime] = None,
         skip_messages_without_text: bool = False,
     ) -> list[TelegramMessageEntity]:
-        self._logger.info(f'[TelegramProxy] Fetching data from {channel_name}')
+        self._logger.info(f"[TelegramProxy] Fetching data from {channel_name}")
 
         channel, _, _ = await self.get_channel_async(channel_name)
         messages_to_return = []
@@ -112,8 +112,8 @@ class TelegramClientProxy(IDataGetterProxy):
         try:
             channel_full_obj = await self._client(functions.channels.GetFullChannelRequest(channel=channel_link))
         except (ValueError, TypeError, UsernameInvalidError) as err:
-            self._logger.warning(f'Impossible to find channel for {channel_link}, with error: {str(err)}')
-            raise InvalidChannelURLError(f'Channel link {channel_link} is invalid, or channel with this name does not exists')
+            self._logger.warning(f"Impossible to find channel for {channel_link}, with error: {str(err)}")
+            raise InvalidChannelURLError(f"Channel link {channel_link} is invalid, or channel with this name does not exists")
 
         return TelegramChannelEntity.from_telegram_obj(
             channel_full_obj.chats[0],
@@ -125,8 +125,8 @@ class TelegramClientProxy(IDataGetterProxy):
         try:
             await self._client.download_profile_photo(channel_link, file=path_to_save)
         except ValueError as err:
-            self._logger.warning(f'Impossible to find channel for {channel_link}, with error: {str(err)}')
-            raise InvalidChannelURLError(f'Channel link {channel_link} is invalid, or channel with this name does not exists')
+            self._logger.warning(f"Impossible to find channel for {channel_link}, with error: {str(err)}")
+            raise InvalidChannelURLError(f"Channel link {channel_link} is invalid, or channel with this name does not exists")
 
     def _initialize_client(self) -> TelegramClient:
         loop = asyncio.new_event_loop()

@@ -25,7 +25,7 @@ class RedisCache(AbstractCache):
         return TelegramChannelEntity(**decoded_channel_dict)
 
     def set_channel_info(self, channel: TelegramChannelEntity) -> None:
-        self._logger.info(f'[RedisCache] Set cache info for channel: {channel.link}')
+        self._logger.info(f"[RedisCache] Set cache info for channel: {channel.link}")
 
         encoded_channel = pickle.dumps(channel.dict())
         self._redis_channel_client.set(name=channel.link, value=encoded_channel)
@@ -34,11 +34,11 @@ class RedisCache(AbstractCache):
         photo_url = self._redis_photo_client.get(name=channel_link)
 
         if photo_url is not None:
-            self._logger.info(f'[RedisCache] Getting cache info for channel photo: {channel_link}')
+            self._logger.info(f"[RedisCache] Getting cache info for channel photo: {channel_link}")
             return photo_url.decode()
 
     def set_channel_photo_url(self, channel_link: str, photo_url: str) -> None:
-        self._logger.info(f'[RedisCache] Set cache info for channel photo: {channel_link}')
+        self._logger.info(f"[RedisCache] Set cache info for channel photo: {channel_link}")
 
         self._redis_photo_client.set(name=channel_link, value=photo_url)
 

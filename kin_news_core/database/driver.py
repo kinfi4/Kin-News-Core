@@ -23,7 +23,7 @@ class Database:
         self._connection: Optional[Connection] = None
 
     def _build_connection_string(self) -> str:
-        return f'postgresql+psycopg2://{self._username}:{self._password}@{self._host}:{self._port}/{self._db_name}'
+        return f"postgresql+psycopg2://{self._username}:{self._password}@{self._host}:{self._port}/{self._db_name}"
 
     def _create_engine(self) -> Engine:
         connection_string = self._build_connection_string()

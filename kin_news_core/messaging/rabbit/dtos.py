@@ -23,7 +23,7 @@ class EventData:
 
     @property
     def event_type(self) -> Optional[str]:
-        return self.headers.get('event-type')
+        return self.headers.get("event-type")
 
 
 @dataclass()
