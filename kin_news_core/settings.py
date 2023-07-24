@@ -1,4 +1,4 @@
-from pydantic import BaseSettings, Field
+from pydantic import Field, BaseSettings
 
 
 class PostgresSettings(BaseSettings):
@@ -9,11 +9,9 @@ class PostgresSettings(BaseSettings):
     password: str = Field(..., env="DATABASE_PASSWORD")
 
 
-class CoreSettings(BaseSettings):
+class AuthSettings(BaseSettings):
     secret_key: str = Field(..., env="SECRET_KEY")
     token_life_minutes: int = Field(..., env="TOKEN_LIFE_MINUTES")
-
-    postgres: PostgresSettings = PostgresSettings()
 
 
 class TelegramSettings(BaseSettings):

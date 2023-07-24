@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import jwt
 
 from kin_news_core.exceptions import AuthenticationFailedError
-from kin_news_core.settings import CoreSettings
+from kin_news_core.settings import AuthSettings
 
 
 def decode_jwt_token(token: str) -> str:
@@ -17,7 +17,7 @@ def decode_jwt_token(token: str) -> str:
     token_to_decode = split_token[1]
 
     try:
-        decoded_token = jwt.decode(token_to_decode, algorithms="HS256", key=CoreSettings().secret_key)
+        decoded_token = jwt.decode(token_to_decode, algorithms="HS256", key=AuthSettings().secret_key)
     except jwt.DecodeError:
         raise AuthenticationFailedError("Invalid symbols passed in auth token")
     except jwt.ExpiredSignatureError:
@@ -30,11 +30,11 @@ def decode_jwt_token(token: str) -> str:
 
 
 def create_jwt_token(username: int | str) -> str:
-    token_duration = timedelta(minutes=CoreSettings().token_life_minutes)
+    token_duration = timedelta(minutes=AuthSettings().token_life_minutes)
     token_expiration_time = datetime.utcnow() + token_duration
 
     to_encode = {"username": username, "exp": token_expiration_time, "sub": "access"}
 
-    encoded_token = jwt.encode(to_encode, algorithm="HS256", key=CoreSettings().secret_key)
+    encoded_token = jwt.encode(to_encode, algorithm="HS256", key=AuthSettings().secret_key)
 
     return encoded_token
