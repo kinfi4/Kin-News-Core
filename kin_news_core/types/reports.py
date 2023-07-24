@@ -1,5 +1,9 @@
 from enum import Enum
-from typing import Type
+from typing import Type, TypeAlias
+
+
+DataByCategory: TypeAlias = dict[str, int]
+DataByDateChannelCategory: TypeAlias = dict[str, DataByCategory]
 
 
 class RawContentTypes(str, Enum):
