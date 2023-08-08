@@ -12,7 +12,7 @@ class RawContentTypes(str, Enum):
     BY_CATEGORY = "ByCategory"
     BY_CHANNEL = "ByChannel"
     BY_DATE = "ByDate"
-    BY_DAY_HOUR = "ByDayHour"
+    BY_DAY_HOUR = "ByHour"
     BY_DATE_BY_CHANNEL = "ByDateByChannel"
 
 
@@ -23,19 +23,20 @@ class DiagramTypes(str, Enum):
     HISTOGRAM = "Histogram"
     SCATTER = "Scatter"
     HEATMAP = "Heatmap"
+    TWO_LEVEL_PIE = "TwoLevelPie"
+    AREA = "Area"
 
 
-def generate_visualization_diagram_types() -> Type[Enum]:
-    enum_dict = {f'{rc}__{dt}': f'{rc}__{dt}' for rc in RawContentTypes for dt in DiagramTypes}
+class VisualizationDiagramTypes(str, Enum):
+    BY_CATEGORY__PIE = f"{RawContentTypes.BY_CATEGORY}__{DiagramTypes.PIE}"
+    BY_CATEGORY__BAR = f"{RawContentTypes.BY_CATEGORY}__{DiagramTypes.BAR}"
+    BY_CATEGORY__LINE = f"{RawContentTypes.BY_CATEGORY}__{DiagramTypes.LINE}"
 
-    _VisualizationDiagramTypes = Enum("VisualizationDiagramTypes", enum_dict)
+    BY_CHANNEL__PIE = f"{RawContentTypes.BY_CHANNEL}__{DiagramTypes.PIE}"
+    BY_CHANNEL__BAR = f"{RawContentTypes.BY_CHANNEL}__{DiagramTypes.BAR}"
 
-    # Add a __str__ method to the Enum
-    def enum_str(self):
-        return self.value
+    BY_CHANNEL_PLUS_BY_CATEGORY__PIE = f"{RawContentTypes.BY_CHANNEL}+{RawContentTypes.BY_CATEGORY}__{DiagramTypes.TWO_LEVEL_PIE}"
 
-    _VisualizationDiagramTypes.__str__ = enum_str
-    return _VisualizationDiagramTypes
+    BY_HOUR__BAR = f"{RawContentTypes.BY_DAY_HOUR}__{DiagramTypes.BAR}"
 
-
-VisualizationDiagramTypes = generate_visualization_diagram_types()
+    BY_DATE_LINE = f"{RawContentTypes.BY_DATE}__{DiagramTypes.LINE}"
