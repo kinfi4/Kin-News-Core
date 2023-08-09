@@ -1,7 +1,10 @@
+import threading
 from contextlib import contextmanager
 from typing import Generator, Optional
 
 from sqlalchemy.engine import Engine, Connection, create_engine
+
+from kin_news_core.database.thread_safe import thread_safe_function
 
 
 class Database:
@@ -21,6 +24,7 @@ class Database:
 
         self._engine = self._create_engine()
         self._connection: Optional[Connection] = None
+        self._connection_registry = threading.local()
 
     def _build_connection_string(self) -> str:
         return f"postgresql+psycopg2://{self._username}:{self._password}@{self._host}:{self._port}/{self._db_name}"
@@ -42,10 +46,13 @@ class Database:
             raise
 
     def get_db_connection(self) -> Connection:
-        if self._connection is None:
-            self._connection = self._engine.connect()
+        try:
+            return self._connection_registry.connection
+        except AttributeError:
+            self._connection_registry.connection = self._engine.connect()
 
-        return self._connection
+        return self._connection_registry.connection
 
     def close(self) -> None:
-        self._connection.close()
+        if self._connection_registry.connection is not None:
+            self._connection_registry.connection.close()
