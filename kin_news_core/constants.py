@@ -4,3 +4,5 @@ JWT_PREFIX = "token"
 KIN_TOKEN_PREFIX = "Kin-Token"
 DEFAULT_DATE_FORMAT = "%d/%m/%Y"
 DEFAULT_DATETIME_FORMAT = "%d/%m/%Y %H:%M"
+
+USERNAME_HEADER = "X-Username"
