@@ -3,7 +3,7 @@ from typing import Union
 
 from pydantic import BaseModel, validator
 
-from kin_reports_generation.constants import ReportTypes
+from kin_news_core.reports_building.constants import ReportTypes
 from kin_news_core.constants import DEFAULT_DATE_FORMAT
 
 

@@ -10,7 +10,7 @@ from kin_news_core.types.reports import (
     DataByCategory,
     DataByDateChannelCategory,
 )
-from kin_reports_generation.constants import (
+from kin_news_core.reports_building.constants import (
     ReportProcessingResult,
     ReportTypes,
 )

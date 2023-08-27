@@ -3,7 +3,7 @@ from typing import Optional
 from typing_extensions import Self
 
 from kin_news_core.reports_building.domain.entities import WordCloudReport
-from kin_reports_generation.constants import (
+from kin_news_core.reports_building.constants import (
     ReportProcessingResult,
     ReportTypes,
 )

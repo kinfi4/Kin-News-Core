@@ -1,1 +1,1 @@
-from .abstract import ModelValidationService
+from .service import ModelValidationService

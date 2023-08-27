@@ -3,7 +3,7 @@ from datetime import datetime
 
 from kin_news_core.types.reports import RawContentTypes, VisualizationDiagramTypes
 from kin_news_core.reports_building.domain.entities import StatisticalReport
-from kin_reports_generation.constants import (
+from kin_news_core.reports_building.constants import (
     ReportProcessingResult,
     ReportTypes,
 )

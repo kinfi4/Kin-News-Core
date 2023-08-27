@@ -5,7 +5,7 @@ from kin_news_core.reports_building.domain.entities import StatisticalReport, Wo
 
 
 class GenerateReportRequestOccurred(BasicEvent, GenerateReportEntity):
-    username: str
+    pass
 
 
 class ReportProcessingStarted(BasicEvent):

@@ -8,7 +8,7 @@ from .model import ModelEntity, CreateModelEntity, ModelValidationEntity, Update
 from .visualization_template import VisualizationTemplate
 
 from kin_news_core.reports_building.domain.services.predicting.predictor.interface import IPredictor
-from kin_reports_generation.constants import ReportTypes
+from kin_news_core.reports_building.constants import ReportTypes
 
 
 class GenerationTemplateWrapper(BaseModel):

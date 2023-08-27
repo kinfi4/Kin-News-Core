@@ -3,13 +3,13 @@ import logging
 from celery import Celery
 from dependency_injector.wiring import Provide, inject
 
-from kin_reports_generation.constants import ModelStatuses
-from kin_reports_generation.settings import CelerySettings
-from kin_reports_generation.types import CategoryMapping
-from kin_news_core.reports_building.domain.services.validation import IModelValidation
-from kin_news_core.reports_building.domain import GenerateReportEntity, ModelEntity
+from kin_news_core.reports_building.constants import ModelStatuses
+from kin_news_core.reports_building.settings import CelerySettings
+from kin_news_core.reports_building.types import CategoryMapping
+from kin_news_core.reports_building.domain.services.validation import ModelValidationService
+from kin_news_core.reports_building.domain.entities import GenerateReportEntity, ModelEntity
 from kin_news_core.reports_building.domain.services.generate_report import IGeneratingReportsService
-from kin_reports_generation.containers import Container
+from kin_news_core.reports_building.containers import Container
 
 _logger = logging.getLogger(__name__)
 
@@ -42,9 +42,10 @@ def generate_statistical_report_task(
         model_id=model_id,
         template_id=template_id,
         name=report_name,
+        username=username,
     )
 
-    generating_reports_service.generate_report(generate_report_entity, username)
+    generating_reports_service.generate_report(generate_report_entity)
 
 
 @celery_app.task
@@ -71,19 +72,20 @@ def generate_word_cloud_task(
         model_id=model_id,
         template_id=template_id,
         name=report_name,
+        username=username,
     )
 
-    generating_word_cloud_service.generate_report(generate_report_entity, username)
+    generating_word_cloud_service.generate_report(generate_report_entity)
 
 
 @celery_app.task
 @inject
 def validate_model(
     model_dict_data: dict[str, str | ModelStatuses | CategoryMapping],
-    model_service: IModelValidation = Provide[Container.domain_services.model_validation_service],
+    model_service: ModelValidationService = Provide[Container.domain_services.model_validation_service],
 ) -> None:
     model = ModelEntity.parse_obj(model_dict_data)
     
-    _logger.info(f"[CELERY] Initiate model validation {model.id} for user {model.owner_username}...")
+    _logger.info(f"[CELERY] Initiate model validation {model.code} for user {model.owner_username}...")
 
     model_service.validate_model(model)

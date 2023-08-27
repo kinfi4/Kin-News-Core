@@ -21,7 +21,7 @@ from kin_news_core.reports_building.events import (
 from kin_news_core.reports_building.domain.services.predicting.predictor import IPredictorFactory, IPredictor
 from kin_news_core.reports_building.domain.services.statistical_report.reports_builder import ReportsBuilder
 from kin_news_core.reports_building.domain.services.word_cloud.reports_builder import WordCloudReportBuilder
-from kin_reports_generation.constants import ReportProcessingResult, REPORTS_STORING_EXCHANGE
+from kin_news_core.reports_building.constants import ReportProcessingResult, REPORTS_STORING_EXCHANGE
 
 
 class IGeneratingReportsService(ABC):
