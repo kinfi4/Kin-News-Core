@@ -2,11 +2,10 @@ from abc import ABC, abstractmethod
 
 from kin_news_core.reports_building.constants import ModelTypes
 from kin_news_core.reports_building.domain.entities import ModelEntity
-from kin_news_core.reports_building.domain.services.predicting.predictor.meta import PredictorMetaClass
 from kin_news_core.reports_building.domain.services.predicting.preprocessing.interface import ITextPreprocessor
 
 
-class IPredictor(ITextPreprocessor, ABC, metaclass=PredictorMetaClass):
+class IPredictor(ITextPreprocessor, ABC):
     model_type_code_list: tuple[str]
 
     @abstractmethod

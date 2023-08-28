@@ -1,5 +1,3 @@
-from typing import Type
-
 from dependency_injector import providers, containers, resources
 
 from kin_news_core.messaging import AbstractEventSubscriber, AbstractEventProducer

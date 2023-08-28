@@ -4,7 +4,7 @@ from pydantic import BaseModel, root_validator
 
 from .generate_report import GenerateReportEntity
 from .reports import BaseReport, WordCloudReport, StatisticalReport
-from .model import ModelEntity, CreateModelEntity, ModelValidationEntity, UpdateModelEntity
+from .model import ModelEntity, ModelValidationEntity
 from .visualization_template import VisualizationTemplate
 
 from kin_news_core.reports_building.domain.services.predicting.predictor.interface import IPredictor
