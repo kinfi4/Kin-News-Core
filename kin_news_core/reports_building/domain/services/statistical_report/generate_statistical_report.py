@@ -27,10 +27,10 @@ class GenerateStatisticalReportService(IGeneratingReportsService):
         telegram_client: IDataGetterProxy,
         events_producer: AbstractEventProducer,
         model_types_service: ModelTypesService,
-        predictor_factory_class: Type[IPredictorFactory],
+        predictor_factory: IPredictorFactory,
         statistics_service: StatisticsService,
     ) -> None:
-        super().__init__(telegram_client, events_producer, model_types_service, predictor_factory_class)
+        super().__init__(telegram_client, events_producer, model_types_service, predictor_factory)
         self._statistics_service = statistics_service
 
         self._csv_writer = None

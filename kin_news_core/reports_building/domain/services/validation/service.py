@@ -3,21 +3,21 @@ import logging
 from kin_news_core.reports_building.domain.entities import ModelEntity
 from kin_news_core.messaging import AbstractEventProducer
 from kin_news_core.reports_building.constants import MODEL_TYPES_EXCHANGE
+from kin_news_core.reports_building.domain.services.validation.factory_interface import BaseValidatorFactory
 from kin_news_core.reports_building.events import ModelValidationStarted, ModelValidationFinished
 from kin_news_core.reports_building.types import ValidationResult
-from kin_news_core.reports_building.infrastructure.services import ModelTypesService
+
+__all__ = ["ModelValidationService"]
 
 
 class ModelValidationService:
     def __init__(
         self,
         events_producer: AbstractEventProducer,
-        model_type_service: ModelTypesService,
-        model_storage_path: str,
+        validador_factory: BaseValidatorFactory,
     ) -> None:
         self._events_producer = events_producer
-        self._model_type_service = model_type_service
-        self._model_storage_path = model_storage_path
+        self._validador_factory = validador_factory
 
         self._logger = logging.getLogger(self.__class__.__name__)
 
@@ -36,7 +36,9 @@ class ModelValidationService:
         self._publish_model_validation_finished(model, validation_status, error_message)
 
     def _validate_model(self, model_entity: ModelEntity) -> ValidationResult:
-        return True, None  # empty validation, in case if user doesn't want to validate model
+        validator = self._validador_factory.create_validator(model_entity)
+
+        return validator.validate_model(model_entity)
 
     def _publish_model_validation_finished(self, model: ModelEntity, status: bool, message: str | None) -> None:
         self._events_producer.publish(

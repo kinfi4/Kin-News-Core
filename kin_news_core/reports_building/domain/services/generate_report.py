@@ -37,14 +37,14 @@ class IGeneratingReportsService(ABC):
         telegram_client: IDataGetterProxy,
         events_producer: AbstractEventProducer,
         model_types_service: ModelTypesService,
-        predictor_factory_class: Type[IPredictorFactory],
+        predictor_factory: IPredictorFactory,
     ) -> None:
         self._logger = logging.getLogger(self.__class__.__name__)
 
         self._telegram = telegram_client
         self._events_producer = events_producer
         self._model_types_service = model_types_service
-        self._predictor_factory_class = predictor_factory_class
+        self._predictor_factory = predictor_factory
 
     def generate_report(self, generate_report_entity: GenerateReportEntity) -> None:
         username = generate_report_entity.username
@@ -109,8 +109,7 @@ class IGeneratingReportsService(ABC):
         return datetime(year=dt.year, month=dt.month, day=dt.day) + timedelta(days=int(end_of_day))
 
     def _initialize_predictor(self, model_entity: ModelEntity) -> IPredictor:
-        predictor_factory = self._predictor_factory_class(model_entity)
-        return predictor_factory.create_predictor()
+        return self._predictor_factory.create_predictor(model_entity)
 
     def _publish_report_processing_started(self, report_id: int) -> None:
         event = ReportProcessingStarted(report_id=report_id)

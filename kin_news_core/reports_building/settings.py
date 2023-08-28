@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     mongodb_connection_string: str = Field(..., env="MONGO_DB_CONNECTION_STRING")
     models_storage_path: str = Field(..., env="MODELS_STORAGE_PATH")
     default_stop_words_path: str = Field(..., env="DEFAULT_STOP_WORDS_PATH")
+    model_types_service_url: str = Field(..., env="MODEL_TYPES_SERVICE_URL")
 
     celery: CelerySettings = CelerySettings()
     telegram: TelegramSettings = TelegramSettings()

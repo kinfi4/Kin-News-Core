@@ -5,6 +5,7 @@ from dependency_injector import providers, containers, resources
 from kin_news_core.messaging import AbstractEventSubscriber, AbstractEventProducer
 from kin_news_core.messaging.rabbit import RabbitProducer, RabbitClient, RabbitSubscriber
 from kin_news_core.reports_building.domain.services.predicting.predictor import IPredictorFactory
+from kin_news_core.reports_building.domain.services.validation.factory_interface import BaseValidatorFactory
 from kin_news_core.telegram import TelegramClientProxy
 from kin_news_core.reports_building.infrastructure.services import StatisticsService, ModelTypesService
 from kin_news_core.reports_building.events import GenerateReportRequestOccurred
@@ -57,6 +58,12 @@ class Clients(containers.DeclarativeContainer):
     )
 
 
+class Factories(containers.DeclarativeContainer):
+    validator_factory: providers.Singleton[BaseValidatorFactory] = providers.Singleton(
+        BaseValidatorFactory,
+    )
+
+
 class Services(containers.DeclarativeContainer):
     config = providers.Configuration()
 
@@ -78,11 +85,13 @@ class DomainServices(containers.DeclarativeContainer):
     clients = providers.DependenciesContainer()
     services = providers.DependenciesContainer()
     messaging = providers.DependenciesContainer()
-    predictor_factory_class: Type[IPredictorFactory] = providers.Object()
+    factories = providers.DependenciesContainer()
+    predictor_factory: Type[IPredictorFactory] = providers.Object()
 
     model_validation_service: providers.Singleton[ModelValidationService] = providers.Singleton(
         ModelValidationService,
         events_producer=messaging.producer,
+        validator_factory=factories.validator_factory,
     )
 
     generate_statistics_report_service: providers.Singleton[GenerateStatisticalReportService] = providers.Singleton(
@@ -90,8 +99,8 @@ class DomainServices(containers.DeclarativeContainer):
         telegram_client=clients.telegram_client,
         events_producer=messaging.producer,
         statistics_service=services.statistics_service,
-        predictor_factory_class=predictor_factory_class,
         model_types_service=services.model_types_service,
+        predictor_factory=predictor_factory,
     )
 
     generate_word_cloud_report_service: providers.Singleton[GenerateWordCloudReportService] = providers.Singleton(
@@ -99,14 +108,14 @@ class DomainServices(containers.DeclarativeContainer):
         telegram_client=clients.telegram_client,
         events_producer=messaging.producer,
         statistics_service=services.statistics_service,
-        predictor_factory_class=predictor_factory_class,
         model_types_service=services.model_types_service,
+        predictor_factory=predictor_factory,
     )
 
 
 class Container(containers.DeclarativeContainer):
     config = providers.Configuration()
-    predictor_factory_class: Type[IPredictorFactory] = providers.Object()
+    predictor_factory: IPredictorFactory = providers.Object()
 
     messaging: providers.Container[Messaging] = providers.Container(
         Messaging,
@@ -123,11 +132,16 @@ class Container(containers.DeclarativeContainer):
         config=config,
     )
 
+    factories: providers.Container[Factories] = providers.Container(
+        Factories,
+    )
+
     domain_services: providers.Container[DomainServices] = providers.Container(
         DomainServices,
         config=config,
         clients=clients,
         services=services,
         messaging=messaging,
-        predictor_factory_class=predictor_factory_class,
+        factories=factories,
+        predictor_factory=predictor_factory,
     )

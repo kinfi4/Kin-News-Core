@@ -1,7 +1,7 @@
 import json
 import tempfile
 from collections import Counter
-from typing import Any, Type
+from typing import Any
 
 from kin_news_core.messaging import AbstractEventProducer
 from kin_news_core.reports_building.domain.entities import WordCloudReport, GenerationTemplateWrapper
@@ -23,10 +23,10 @@ class GenerateWordCloudReportService(IGeneratingReportsService):
         telegram_client: IDataGetterProxy,
         events_producer: AbstractEventProducer,
         model_types_service: ModelTypesService,
-        predictor_factory_class: Type[IPredictorFactory],
+        predictor_factory: IPredictorFactory,
         statistics_service: StatisticsService,
     ) -> None:
-        super().__init__(telegram_client, events_producer, model_types_service, predictor_factory_class)
+        super().__init__(telegram_client, events_producer, model_types_service, predictor_factory)
         self._statistics_service = statistics_service
 
     def _build_report_entity(self, generate_report_wrapper: GenerationTemplateWrapper) -> WordCloudReport:

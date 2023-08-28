@@ -14,9 +14,6 @@ class IPredictor(ITextPreprocessor, ABC, metaclass=PredictorMetaClass):
 
 
 class IPredictorFactory(ABC):
-    def __init__(self, model_entity: ModelEntity) -> None:
-        self._model_entity = model_entity
-
     @abstractmethod
-    def create_predictor(self) -> IPredictor:
+    def create_predictor(self, model_entity: ModelEntity) -> IPredictor:
         pass
