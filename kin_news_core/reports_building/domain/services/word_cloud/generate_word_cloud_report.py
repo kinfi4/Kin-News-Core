@@ -23,8 +23,8 @@ class GenerateWordCloudReportService(IGeneratingReportsService):
         telegram_client: IDataGetterProxy,
         events_producer: AbstractEventProducer,
         model_types_service: ModelTypesService,
-        predictor_factory: IPredictorFactory,
         statistics_service: StatisticsService,
+        predictor_factory: IPredictorFactory,
     ) -> None:
         super().__init__(telegram_client, events_producer, model_types_service, predictor_factory)
         self._statistics_service = statistics_service
