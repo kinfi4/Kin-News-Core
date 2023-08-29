@@ -37,4 +37,4 @@ class ModelValidationFinished(BasicEvent):
     code: str
     username: str
     validation_passed: bool
-    error: str = None
+    message: str = None

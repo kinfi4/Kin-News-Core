@@ -33,7 +33,8 @@ class RabbitCallbackWrapper:
     def _handle_error(self, event_data: EventData, exc: Exception) -> None:
         self._logger.error(
             f"[RabbitCallbackWrapper] "
-            f"During handling event error {exc.__class__.__name__} occurred with message: {str(exc)}"
+            f"During handling event error {exc.__class__.__name__} occurred with message: {str(exc)}",
+            exc_info=True,
         )
 
         event_data.channel.basic_nack(delivery_tag=event_data.delivery_tag, requeue=False)

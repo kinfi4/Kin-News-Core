@@ -7,7 +7,7 @@ from kin_news_core.reports_building.domain.services.predicting.predictor import 
 from kin_news_core.reports_building.domain.services.validation.factory_interface import BaseValidatorFactory
 from kin_news_core.telegram import TelegramClientProxy
 from kin_news_core.reports_building.infrastructure.services import StatisticsService, ModelTypesService
-from kin_news_core.reports_building.events import GenerateReportRequestOccurred
+from kin_news_core.reports_building.events import GenerateReportRequestOccurred, ModelValidationRequestOccurred
 from kin_news_core.reports_building.domain.services.validation import ModelValidationService
 from kin_news_core.reports_building.domain.services.statistical_report.generate_statistical_report import GenerateStatisticalReportService
 from kin_news_core.reports_building.domain.services.word_cloud.generate_word_cloud_report import GenerateWordCloudReportService
@@ -20,9 +20,11 @@ class SubscriberResource(resources.Resource):
 
         from kin_news_core.reports_building.events.handlers import (
             on_report_processing_request,
+            on_model_validation_request,
         )
 
         subscriber.subscribe(REPORTS_BUILDER_EXCHANGE, GenerateReportRequestOccurred, on_report_processing_request)
+        subscriber.subscribe(REPORTS_BUILDER_EXCHANGE, ModelValidationRequestOccurred, on_model_validation_request)
 
         return subscriber
 

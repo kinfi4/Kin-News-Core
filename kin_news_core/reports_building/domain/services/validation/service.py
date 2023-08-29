@@ -14,10 +14,10 @@ class ModelValidationService:
     def __init__(
         self,
         events_producer: AbstractEventProducer,
-        validador_factory: BaseValidatorFactory,
+        validator_factory: BaseValidatorFactory,
     ) -> None:
         self._events_producer = events_producer
-        self._validador_factory = validador_factory
+        self._validator_factory = validator_factory
 
         self._logger = logging.getLogger(self.__class__.__name__)
 
@@ -36,7 +36,7 @@ class ModelValidationService:
         self._publish_model_validation_finished(model, validation_status, error_message)
 
     def _validate_model(self, model_entity: ModelEntity) -> ValidationResult:
-        validator = self._validador_factory.create_validator(model_entity)
+        validator = self._validator_factory.create_validator(model_entity)
 
         return validator.validate_model(model_entity)
 
@@ -47,8 +47,8 @@ class ModelValidationService:
                 ModelValidationFinished(
                     code=model.code,
                     username=model.owner_username,
-                    status=status,
-                    error_message=message,
+                    validation_passed=status,
+                    message=message,
                 )
             ]
         )
