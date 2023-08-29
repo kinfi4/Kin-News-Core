@@ -1,5 +1,3 @@
-from typing import BinaryIO
-
 from requests import JSONDecodeError
 
 from kin_news_core.constants import USERNAME_HEADER
@@ -11,11 +9,11 @@ class ModelTypesService(ServiceProxy):
         super().__init__(jwt_token=jwt_token, kin_token=kin_token)
         self._base_url = url
 
-    def get_model_binaries(self, username: str, model_code: str) -> BinaryIO:
+    def get_model_binaries(self, username: str, model_code: str) -> bytes:
         target_url = f"{self._base_url}/blobs/get-model-binaries/{model_code}"
         return self._make_get_request(username=username, target_url=target_url)
 
-    def get_tokenizer_binaries(self, username: str, model_code: str) -> BinaryIO:
+    def get_tokenizer_binaries(self, username: str, model_code: str) -> bytes:
         target_url = f"{self._base_url}/blobs/get-tokenizer-binaries/{model_code}"
         return self._make_get_request(username=username, target_url=target_url)
 
@@ -31,7 +29,7 @@ class ModelTypesService(ServiceProxy):
         target_url = f"{self._base_url}/visualization-template/{template_id}"
         return self._make_get_request(username=username, target_url=target_url)
 
-    def _make_get_request(self, username: str, target_url: str) -> dict | BinaryIO:
+    def _make_get_request(self, username: str, target_url: str) -> dict | bytes:
         self._session.headers.update({USERNAME_HEADER: username})
 
         response = self._session.get(url=target_url)
