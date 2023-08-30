@@ -30,7 +30,7 @@ class ModelValidationService:
         try:
             validation_status, error_message = self._validate_model(model)
         except Exception as error:
-            self._logger.error(f"[ModelService] Model validation failed: {error}")
+            self._logger.error(f"[Core-ModelValidationService] Model validation failed: {error}")
             validation_status, error_message = False, str(error)
 
         self._publish_model_validation_finished(model, validation_status, error_message)

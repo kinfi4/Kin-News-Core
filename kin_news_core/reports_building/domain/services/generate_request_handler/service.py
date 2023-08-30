@@ -33,7 +33,7 @@ class GenerateRequestHandlerService:
             channel_list=event.channel_list,
             username=event.username,
             report_id=event.report_id,
-            model_id=event.model_code,
+            model_code=event.model_code,
             template_id=event.template_id,
             report_name=event.name,
         )
@@ -41,7 +41,7 @@ class GenerateRequestHandlerService:
     def _check_if_model_is_handled(self, username: str, model_code: str) -> bool:
         model_meta = self._model_types_service.get_model_metadata(username, model_code)
 
-        return self._predictor_factory.is_handling(model_meta["model_type"], model_code)
+        return self._predictor_factory.is_handling(model_meta["modelType"], model_code)
 
     def _get_celery_task_from_event(self, event: GenerateReportRequestOccurred) -> Callable[..., None]:
         from kin_news_core.reports_building.tasks import generate_word_cloud_task, generate_statistical_report_task

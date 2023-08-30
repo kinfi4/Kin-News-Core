@@ -76,7 +76,7 @@ class Services(containers.DeclarativeContainer):
 
     model_types_service: providers.Singleton[ModelTypesService] = providers.Singleton(
         ModelTypesService,
-        url=config.statistics_service,
+        url=config.model_types_service_url,
         kin_token=config.kin_token,
     )
 
