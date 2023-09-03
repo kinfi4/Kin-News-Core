@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+__all__ = ["ITextPreprocessor"]
+
 
 class ITextPreprocessor(ABC):
     @abstractmethod

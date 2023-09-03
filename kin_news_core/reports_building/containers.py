@@ -1,7 +1,10 @@
+from typing import Iterable
+
 from dependency_injector import providers, containers, resources
 
 from kin_news_core.messaging import AbstractEventSubscriber, AbstractEventProducer
 from kin_news_core.messaging.rabbit import RabbitProducer, RabbitClient, RabbitSubscriber
+from kin_news_core.messaging.rabbit.dtos import Subscription
 from kin_news_core.reports_building.domain.services import GenerateRequestHandlerService
 from kin_news_core.reports_building.domain.services.predicting.predictor import IPredictorFactory
 from kin_news_core.reports_building.domain.services.validation.factory_interface import BaseValidatorFactory
@@ -15,7 +18,11 @@ from kin_news_core.reports_building.constants import REPORTS_BUILDER_EXCHANGE
 
 
 class SubscriberResource(resources.Resource):
-    def init(self, client: RabbitClient) -> AbstractEventSubscriber:
+    def init(
+        self,
+        client: RabbitClient,
+        additional_subscriptions: Iterable[Subscription] | None = None,
+    ) -> AbstractEventSubscriber:
         subscriber = RabbitSubscriber(client=client)
 
         from kin_news_core.reports_building.events.handlers import (
@@ -26,11 +33,16 @@ class SubscriberResource(resources.Resource):
         subscriber.subscribe(REPORTS_BUILDER_EXCHANGE, GenerateReportRequestOccurred, on_report_processing_request)
         subscriber.subscribe(REPORTS_BUILDER_EXCHANGE, ModelValidationRequestOccurred, on_model_validation_request)
 
+        if additional_subscriptions is not None:
+            for subscription in additional_subscriptions:
+                subscriber.subscribe(subscription.aggregate_type, subscription.event_class, subscription.callback)
+
         return subscriber
 
 
 class Messaging(containers.DeclarativeContainer):
     config = providers.Configuration()
+    additional_subscriptions: list[Subscription] = providers.List()
 
     rabbitmq_client: providers.Singleton[RabbitClient] = providers.Singleton(
         RabbitClient,
@@ -45,6 +57,7 @@ class Messaging(containers.DeclarativeContainer):
     subscriber: providers.Resource[AbstractEventSubscriber] = providers.Resource(
         SubscriberResource,
         client=rabbitmq_client,
+        additional_subscriptions=additional_subscriptions,
     )
 
 
