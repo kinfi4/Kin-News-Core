@@ -64,5 +64,7 @@ def run_consumer(
     settings = Settings()
     container = init_containers(settings, predictor_factory, validator_factory, additional_subscriptions)
 
+    container.domain_services.model_type_registration_service().register_model_type()
+
     _logger.info("Consuming started...")
     container.messaging.subscriber().start_consuming()

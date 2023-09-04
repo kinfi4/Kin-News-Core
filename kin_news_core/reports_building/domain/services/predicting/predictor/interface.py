@@ -1,19 +1,21 @@
+from typing import Literal
 from abc import ABC, abstractmethod
 
 from kin_news_core.reports_building.constants import ModelTypes
-from kin_news_core.reports_building.domain.entities import ModelEntity
+from kin_news_core.reports_building.domain.entities import ModelEntity, CustomModelRegistrationEntity
+from kin_news_core.reports_building.domain.services.predicting.predictor.meta import PredictorValidateModelType
 from kin_news_core.reports_building.domain.services.predicting.preprocessing.interface import ITextPreprocessor
 
 
 class IPredictor(ITextPreprocessor, ABC):
-    model_type_code_list: tuple[str]
-
     @abstractmethod
     def predict(self, text: str) -> str:
         pass
 
 
-class IPredictorFactory(ABC):
+class IPredictorFactory(ABC, metaclass=PredictorValidateModelType):
+    model_type: CustomModelRegistrationEntity | Literal["GenericModel"]
+
     @abstractmethod
     def create_predictor(self, model_entity: ModelEntity) -> IPredictor:
         pass

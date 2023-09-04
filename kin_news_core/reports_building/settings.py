@@ -22,8 +22,6 @@ class Settings(BaseSettings):
     kin_token: str = Field(..., env="KIN_TOKEN")
     statistics_service: str = Field(..., env="STATISTICS_SERVICE_URL")
     rabbitmq_connection_string: str = Field(..., env="RABBITMQ_CONNECTION_STRING")
-    mongodb_connection_string: str = Field(..., env="MONGO_DB_CONNECTION_STRING")
-    model_storage_path: str = Field(..., env="MODEL_STORAGE_PATH")
     model_types_service_url: str = Field(..., env="MODEL_TYPES_SERVICE_URL")
 
     celery: CelerySettings = CelerySettings()

@@ -14,6 +14,14 @@ class ServiceProxyError(KinNewsCoreException):
     pass
 
 
+class ServiceProxyNotFoundError(ServiceProxyError):
+    pass
+
+
+class ServiceProxyDuplicateError(ServiceProxyError):
+    pass
+
+
 class TelegramIsUnavailable(KinNewsCoreException):
     seconds_to_wait: int
 

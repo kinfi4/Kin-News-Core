@@ -6,6 +6,7 @@ from kin_news_core.messaging import AbstractEventSubscriber, AbstractEventProduc
 from kin_news_core.messaging.rabbit import RabbitProducer, RabbitClient, RabbitSubscriber
 from kin_news_core.messaging.rabbit.dtos import Subscription
 from kin_news_core.reports_building.domain.services import GenerateRequestHandlerService
+from kin_news_core.reports_building.domain.services.model_registration import ModelTypeRegistrationService
 from kin_news_core.reports_building.domain.services.predicting.predictor import IPredictorFactory
 from kin_news_core.reports_building.domain.services.validation.factory_interface import BaseValidatorFactory
 from kin_news_core.telegram import TelegramClientProxy
@@ -106,6 +107,12 @@ class DomainServices(containers.DeclarativeContainer):
         ModelValidationService,
         events_producer=messaging.producer,
         validator_factory=factories.validator_factory,
+    )
+
+    model_type_registration_service: providers.Singleton[ModelTypeRegistrationService] = providers.Singleton(
+        ModelTypeRegistrationService,
+        predictor_factory=predictor_factory,
+        model_types_service=services.model_types_service,
     )
 
     generate_request_handler_service: providers.Singleton[GenerateRequestHandlerService] = providers.Singleton(

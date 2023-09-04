@@ -1,10 +1,10 @@
-import re
-from enum import Enum, EnumMeta
-from typing import Type
+from enum import Enum
 
 REPORTS_BUILDER_EXCHANGE = "ReportsBuilder"
 REPORTS_STORING_EXCHANGE = "ReportsStoring"
 MODEL_TYPES_EXCHANGE = "ModelTypes"
+
+GENERIC_MODEL_TYPE = "GenericModel"
 
 
 class ReportTypes(str, Enum):

@@ -1,7 +1,11 @@
-from requests import JSONDecodeError
+from typing import Any
+
+from requests import JSONDecodeError, Response
 
 from kin_news_core.constants import USERNAME_HEADER
+from kin_news_core.exceptions import ServiceProxyNotFoundError, ServiceProxyDuplicateError
 from kin_news_core.service_proxy import ServiceProxy, ServiceProxyError
+from kin_news_core.reports_building.domain.entities import CustomModelRegistrationEntity
 
 
 class ModelTypesService(ServiceProxy):
@@ -29,22 +33,43 @@ class ModelTypesService(ServiceProxy):
         target_url = f"{self._base_url}/visualization-template/{template_id}"
         return self._make_get_request(username=username, target_url=target_url)
 
+    def register_model_type(self, model: CustomModelRegistrationEntity) -> dict[str, Any]:
+        data = model.dict(by_alias=True)
+        target_url = f"{self._base_url}/models/register"
+
+        return self._make_post_request(username=model.owner_username, target_url=target_url, data=data)
+
     def _make_get_request(self, username: str, target_url: str) -> dict | bytes:
         self._session.headers.update({USERNAME_HEADER: username})
 
         response = self._session.get(url=target_url)
 
+        return self._handle_response(response)
+
+    def _make_post_request(self, username: str, target_url: str, data: dict[str, Any]) -> dict[str, Any]:
+        self._session.headers.update({USERNAME_HEADER: username})
+
+        response = self._session.post(url=target_url, json=data)
+
+        return self._handle_response(response)
+
+    def _handle_response(self, response: Response) -> dict[str, Any] | bytes:
         if not response.ok:
             try:
                 message = response.json()
             except JSONDecodeError:
                 message = response.text
 
-            self._logger.error(
+            self._logger.warning(
                 f'[ModelTypesService] '
-                f'Request to {target_url} failed with status: {response.status_code} with message: {message}.'
+                f'Request to {response.url} failed with status: {response.status_code} with message: {message}.'
             )
 
-            raise ServiceProxyError(f'Request to {target_url} failed with status: {response.status_code}')
+            if response.status_code == 404:
+                raise ServiceProxyNotFoundError(f'Request to {response.url} failed with status: {response.status_code}')
+            elif response.status_code == 409:
+                raise ServiceProxyDuplicateError(f'Request to {response.url} failed with status: {response.status_code}')
+            else:
+                raise ServiceProxyError(f'Request to {response.url} failed with status: {response.status_code}')
 
         return response.json() if response.headers.get("Content-Type") == "application/json" else response.content
