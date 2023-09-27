@@ -1,9 +1,11 @@
 import csv
 import tempfile
-from typing import Any, TextIO, Type
+from typing import Any, TextIO
 
+from kin_news_core.datasources.common import DatasourceLink
 from kin_news_core.messaging import AbstractEventProducer
 from kin_news_core.constants import DEFAULT_DATE_FORMAT
+from kin_news_core.reports_building.domain.services.datasources.interface import IDataSourceFactory
 from kin_news_core.reports_building.domain.services.predicting.predictor import IPredictorFactory
 from kin_news_core.types.reports import RawContentTypes
 
@@ -15,7 +17,6 @@ from kin_news_core.reports_building.domain.entities import (
 )
 from kin_news_core.reports_building.domain.services.generate_report import IGeneratingReportsService
 from kin_news_core.reports_building.domain.services.statistical_report.reports_builder import ReportsBuilder
-from kin_news_core.telegram.interfaces import IDataGetterProxy
 from kin_news_core.reports_building.infrastructure.services import StatisticsService, ModelTypesService
 
 
@@ -24,13 +25,13 @@ class GenerateStatisticalReportService(IGeneratingReportsService):
 
     def __init__(
         self,
-        telegram_client: IDataGetterProxy,
         events_producer: AbstractEventProducer,
         model_types_service: ModelTypesService,
         statistics_service: StatisticsService,
         predictor_factory: IPredictorFactory,
+        datasource_factory: IDataSourceFactory,
     ) -> None:
-        super().__init__(telegram_client, events_producer, model_types_service, predictor_factory)
+        super().__init__(events_producer, model_types_service, predictor_factory, datasource_factory)
         self._statistics_service = statistics_service
 
         self._csv_writer = None
@@ -61,19 +62,21 @@ class GenerateStatisticalReportService(IGeneratingReportsService):
         predictor = generate_report_wrapper.predictor
         posts_category_list = list(generate_report_wrapper.model_metadata.category_mapping.values())
 
+        datasource = self._datasource_factory.get_data_source(generate_report_meta.datasource_type)
+
         report_data = self._initialize_report_data_dict(generate_report_wrapper)
 
-        for channel in generate_report_meta.channel_list:
-            telegram_messages = self._telegram.fetch_posts_from_channel(
-                channel_name=channel,
+        for source_name in generate_report_meta.channel_list:
+            posts = datasource.fetch_data(source=DatasourceLink(
+                source_link=source_name,
                 offset_date=self._datetime_from_date(generate_report_meta.end_date, end_of_day=True),
                 earliest_date=self._datetime_from_date(generate_report_meta.start_date),
                 skip_messages_without_text=True,
-            )
+            ))
 
-            self._logger.info(f"[GenerateStatisticalReportService] Gathered {len(telegram_messages)} messages from {channel}")
+            self._logger.info(f"[GenerateStatisticalReportService] Gathered {len(posts)} messages from {source_name}")
 
-            for message in telegram_messages:
+            for message in posts:
                 message_date_str = message.created_at.date().strftime(DEFAULT_DATE_FORMAT)
                 message_hour = message.created_at.hour
 
@@ -81,7 +84,7 @@ class GenerateStatisticalReportService(IGeneratingReportsService):
 
                 self._csv_writer.writerow([
                     message_date_str,
-                    channel,
+                    source_name,
                     message_hour,
                     message.text,
                     message_category,
@@ -91,11 +94,11 @@ class GenerateStatisticalReportService(IGeneratingReportsService):
 
                 for content_type in generate_report_wrapper.visualization_template.content_types:
                     if content_type == RawContentTypes.BY_CHANNEL:
-                        report_data["data"][content_type][channel] += 1
+                        report_data["data"][content_type][source_name] += 1
                     elif content_type == RawContentTypes.BY_CATEGORY:
                         report_data["data"][content_type][message_category] += 1
                     elif content_type == RawContentTypes.BY_CHANNEL_BY_CATEGORY:
-                        report_data["data"][content_type][channel][message_category] += 1
+                        report_data["data"][content_type][source_name][message_category] += 1
                     elif content_type == RawContentTypes.BY_DAY_HOUR:
                         report_data["data"][content_type][str(message_hour)] += 1
                     elif content_type == RawContentTypes.BY_DATE:
@@ -112,7 +115,7 @@ class GenerateStatisticalReportService(IGeneratingReportsService):
                         if message_date_str not in report_data["data"][content_type]:
                             report_data["data"][content_type][message_date_str] = {_channel: 0 for _channel in generate_report_meta.channel_list}
 
-                        report_data["data"][content_type][message_date_str][channel] += 1
+                        report_data["data"][content_type][message_date_str][source_name] += 1
 
         if RawContentTypes.BY_DATE_BY_CHANNEL in generate_report_wrapper.visualization_template.content_types:
             report_data["data"][RawContentTypes.BY_DATE_BY_CHANNEL] = self._reverse_dict_keys(

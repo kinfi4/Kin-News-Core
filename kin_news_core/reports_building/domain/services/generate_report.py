@@ -1,10 +1,9 @@
 import logging
 from abc import ABC, abstractmethod
 from datetime import date, datetime, timedelta
-from typing import Type
 
-from kin_news_core.telegram import IDataGetterProxy
 from kin_news_core.messaging import AbstractEventProducer
+from kin_news_core.reports_building.domain.services.datasources.interface import IDataSourceFactory
 from kin_news_core.reports_building.infrastructure.services import ModelTypesService
 from kin_news_core.reports_building.domain.entities import (
     GenerateReportEntity,
@@ -34,17 +33,17 @@ class IGeneratingReportsService(ABC):
 
     def __init__(
         self,
-        telegram_client: IDataGetterProxy,
         events_producer: AbstractEventProducer,
         model_types_service: ModelTypesService,
         predictor_factory: IPredictorFactory,
+        datasource_factory: IDataSourceFactory,
     ) -> None:
         self._logger = logging.getLogger(self.__class__.__name__)
 
-        self._telegram = telegram_client
         self._events_producer = events_producer
         self._model_types_service = model_types_service
         self._predictor_factory = predictor_factory
+        self._datasource_factory = datasource_factory
 
     def generate_report(self, generate_report_entity: GenerateReportEntity) -> None:
         username = generate_report_entity.username

@@ -35,7 +35,8 @@ class GenerateRequestHandlerService:
             report_id=event.report_id,
             model_code=event.model_code,
             template_id=event.template_id,
-            report_name=event.name,
+            name=event.name,
+            datasource_type=event.datasource_type,
         )
 
     def _check_if_model_is_handled(self, username: str, model_code: str) -> bool:

@@ -5,6 +5,7 @@ from pydantic import BaseModel, validator
 
 from kin_news_core.reports_building.constants import ReportTypes
 from kin_news_core.constants import DEFAULT_DATE_FORMAT
+from kin_news_core.datasources.constants import DataSourceTypes
 
 
 def _cast_string_to_date(date_string: str) -> date:
@@ -23,6 +24,7 @@ class GenerateReportEntity(BaseModel):
     start_date: date
     end_date: date
     channel_list: list[str]
+    datasource_type: DataSourceTypes = DataSourceTypes.TELEGRAM
     report_type: ReportTypes | None = None
 
     @validator('start_date', pre=True)

@@ -4,7 +4,7 @@ import logging
 from redis import Redis
 
 from kin_news_core.cache.interfaces import AbstractCache
-from kin_news_core.telegram.entities import TelegramChannelEntity
+from kin_news_core.datasources.telegram import TelegramChannelEntity
 
 
 class RedisCache(AbstractCache):

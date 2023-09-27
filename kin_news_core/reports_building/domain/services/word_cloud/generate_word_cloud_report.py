@@ -3,14 +3,15 @@ import tempfile
 from collections import Counter
 from typing import Any
 
+from kin_news_core.datasources.common import DatasourceLink
 from kin_news_core.messaging import AbstractEventProducer
 from kin_news_core.reports_building.domain.entities import WordCloudReport, GenerationTemplateWrapper
+from kin_news_core.reports_building.domain.services.datasources.interface import IDataSourceFactory
 from kin_news_core.reports_building.domain.services.generate_report import IGeneratingReportsService
 from kin_news_core.reports_building.domain.services.predicting.predictor import IPredictorFactory
 from kin_news_core.reports_building.domain.services.word_cloud.reports_builder import (
     WordCloudReportBuilder,
 )
-from kin_news_core.telegram import IDataGetterProxy
 from kin_news_core.reports_building.infrastructure.services import StatisticsService, ModelTypesService
 
 
@@ -20,13 +21,13 @@ class GenerateWordCloudReportService(IGeneratingReportsService):
 
     def __init__(
         self,
-        telegram_client: IDataGetterProxy,
         events_producer: AbstractEventProducer,
         model_types_service: ModelTypesService,
         statistics_service: StatisticsService,
         predictor_factory: IPredictorFactory,
+        datasource_factory: IDataSourceFactory,
     ) -> None:
-        super().__init__(telegram_client, events_producer, model_types_service, predictor_factory)
+        super().__init__(events_producer, model_types_service, predictor_factory, datasource_factory)
         self._statistics_service = statistics_service
 
     def _build_report_entity(self, generate_report_wrapper: GenerationTemplateWrapper) -> WordCloudReport:
@@ -45,6 +46,8 @@ class GenerateWordCloudReportService(IGeneratingReportsService):
         )
 
     def __gather_data(self, generate_report_wrapper: GenerationTemplateWrapper) -> dict[str, Any]:
+        datasource = self._datasource_factory.get_data_source(generate_report_wrapper.generate_report_metadata.datasource_type)
+
         generate_report_meta = generate_report_wrapper.generate_report_metadata
         predictor = generate_report_wrapper.predictor
 
@@ -53,17 +56,17 @@ class GenerateWordCloudReportService(IGeneratingReportsService):
             categories=[category for category in generate_report_wrapper.model_metadata.category_mapping.values()],
         )
 
-        for channel_name in generate_report_meta.channel_list:
-            telegram_messages = self._telegram.fetch_posts_from_channel(
-                channel_name=channel_name,
+        for source_name in generate_report_meta.channel_list:
+            posts = datasource.fetch_data(source=DatasourceLink(
+                source_link=source_name,
                 offset_date=self._datetime_from_date(generate_report_meta.end_date, end_of_day=True),
                 earliest_date=self._datetime_from_date(generate_report_meta.start_date),
                 skip_messages_without_text=True,
-            )
+            ))
 
-            self._logger.info(f"[GenerateWordCloudReportService] Gathered {len(telegram_messages)} messages from {channel_name}")
+            self._logger.info(f"[GenerateWordCloudReportService] Gathered {len(posts)} messages from {source_name}")
 
-            for message in telegram_messages:
+            for message in posts:
                 message_text_preprocessed = predictor.preprocess_and_lemmatize(message.text)
 
                 news_category = predictor.predict(message.text)
@@ -75,11 +78,11 @@ class GenerateWordCloudReportService(IGeneratingReportsService):
 
                 _data["total_words_frequency"].update(words_counted)
 
-                _data["data_by_channel"][channel_name].update(words_counted)
+                _data["data_by_channel"][source_name].update(words_counted)
 
                 _data["data_by_category"][news_category].update(words_counted)
 
-                _data["data_by_channel_by_category"][channel_name][news_category].update(words_counted)
+                _data["data_by_channel_by_category"][source_name][news_category].update(words_counted)
 
         self._save_word_cloud_data_to_file(generate_report_meta.report_id, _data)
 

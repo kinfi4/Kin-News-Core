@@ -2,7 +2,7 @@ from typing import Optional
 from datetime import datetime
 from abc import ABC, abstractmethod
 
-from kin_news_core.telegram.entities import TelegramMessageEntity, TelegramChannelEntity
+from kin_news_core.datasources.telegram.entities import TelegramMessageEntity, TelegramChannelEntity
 
 
 class IDataGetterProxy(ABC):

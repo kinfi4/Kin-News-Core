@@ -4,7 +4,7 @@ import pickle
 from aioredis import Redis
 
 from kin_news_core.cache import AbstractCache
-from kin_news_core.telegram.entities import TelegramChannelEntity
+from kin_news_core.datasources.telegram import TelegramChannelEntity
 
 
 class AsyncRedisCache(AbstractCache):

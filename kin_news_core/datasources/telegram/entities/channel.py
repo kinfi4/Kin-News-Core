@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from telethon.tl.types import Channel
 
-from kin_news_core.telegram.utils import compose_participants_count
+from kin_news_core.datasources.telegram.utils import compose_participants_count
 
 
 class TelegramChannelEntity(BaseModel):

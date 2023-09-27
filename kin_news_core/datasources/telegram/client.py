@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Generator
 
 from telethon import TelegramClient
 from telethon.errors import FloodWaitError, UsernameInvalidError
@@ -9,16 +9,17 @@ from telethon.tl.custom.message import Message
 from telethon.sessions import StringSession
 from telethon import functions
 
+from kin_news_core.datasources.common import IDataSource, DatasourceLink, ClassificationEntity
 from kin_news_core.exceptions import InvalidChannelURLError, TelegramIsUnavailable
-from kin_news_core.telegram.entities import TelegramMessageEntity, TelegramChannelEntity
+from kin_news_core.datasources.telegram.entities import TelegramMessageEntity, TelegramChannelEntity
 from kin_news_core.constants import MESSAGES_LIMIT_FOR_ONE_CALL
-from kin_news_core.telegram.interfaces import IDataGetterProxy
-from kin_news_core.telegram.retry import retry_connection_async, retry_connection_sync
+from kin_news_core.datasources.telegram.interfaces import IDataGetterProxy
+from kin_news_core.datasources.telegram.retry import retry_connection_async, retry_connection_sync
 
 logging.getLogger("telethon").setLevel(logging.ERROR)
 
 
-class TelegramClientProxy(IDataGetterProxy):
+class TelegramDatasource(IDataGetterProxy, IDataSource):
     def __init__(self, session_str: str, api_id: int, api_hash: str) -> None:
         self._session_obj = StringSession(session_str)
         self._api_id = api_id
@@ -26,6 +27,18 @@ class TelegramClientProxy(IDataGetterProxy):
 
         self._client = None
         self._logger = logging.getLogger(self.__class__.__name__)
+
+    def fetch_data(self, source: DatasourceLink) -> list[ClassificationEntity]:
+        messages: list[TelegramMessageEntity] = self.fetch_posts_from_channel(
+            source.source_link,
+            offset_date=source.offset_date,
+            earliest_date=source.earliest_date,
+            skip_messages_without_text=source.skip_messages_without_text,
+        )
+
+        return [
+            ClassificationEntity(text=message.text, created_at=message.created_at) for message in messages
+        ]
 
     @retry_connection_sync
     def fetch_posts_from_channel(
@@ -52,7 +65,7 @@ class TelegramClientProxy(IDataGetterProxy):
 
     @retry_connection_sync
     def get_channel(self, channel_link: str) -> TelegramChannelEntity:
-        self._logger.info(f"[TelegramClientProxy] Getting information for channel: {channel_link}")
+        self._logger.info(f"[TelegramDatasource] Getting information for channel: {channel_link}")
 
         with self._client:
             return self._client.loop.run_until_complete(

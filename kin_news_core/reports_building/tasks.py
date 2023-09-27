@@ -21,60 +21,24 @@ celery_app.config_from_object(CelerySettings())
 @celery_app.task
 @inject
 def generate_statistical_report_task(
-    start_date: str,
-    end_date: str,
-    channel_list: list[str],
-    username: str,
-    report_id: int,
-    model_code: str,
-    template_id: str,
-    report_name: str,
     generating_reports_service: IGeneratingReportsService = Provide[Container.domain_services.generate_statistics_report_service],
     **kwargs,
 ) -> None:
     _logger.info("Instantiating generate report entity and running the processing...")
 
-    generate_report_entity = GenerateReportEntity(
-        start_date=start_date,
-        end_date=end_date,
-        channel_list=channel_list,
-        report_id=report_id,
-        model_code=model_code,
-        template_id=template_id,
-        name=report_name,
-        username=username,
-    )
-
+    generate_report_entity = GenerateReportEntity(**kwargs)
     generating_reports_service.generate_report(generate_report_entity)
 
 
 @celery_app.task
 @inject
 def generate_word_cloud_task(
-    start_date: str,
-    end_date: str,
-    channel_list: list[str],
-    username: str,
-    report_id: int,
-    model_code: str,
-    template_id: str,
-    report_name: str,
     generating_word_cloud_service: IGeneratingReportsService = Provide[Container.domain_services.generate_word_cloud_report_service],
     **kwargs,
 ) -> None:
     _logger.info("Instantiating generate report entity and running the processing...")
 
-    generate_report_entity = GenerateReportEntity(
-        start_date=start_date,
-        end_date=end_date,
-        channel_list=channel_list,
-        report_id=report_id,
-        model_code=model_code,
-        template_id=template_id,
-        name=report_name,
-        username=username,
-    )
-
+    generate_report_entity = GenerateReportEntity(**kwargs)
     generating_word_cloud_service.generate_report(generate_report_entity)
 
 

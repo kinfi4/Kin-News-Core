@@ -4,7 +4,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 from telethon.tl.custom.message import Message
 
-from kin_news_core.telegram.utils import compose_message_link
+from kin_news_core.datasources.telegram.utils import compose_message_link
 
 
 class TelegramMessageEntity(BaseModel):

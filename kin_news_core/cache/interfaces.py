@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from kin_news_core.telegram.entities import TelegramChannelEntity
+from kin_news_core.datasources.telegram import TelegramChannelEntity
 
 
 class AbstractCache(ABC):

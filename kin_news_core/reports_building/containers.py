@@ -6,10 +6,11 @@ from kin_news_core.messaging import AbstractEventSubscriber, AbstractEventProduc
 from kin_news_core.messaging.rabbit import RabbitProducer, RabbitClient, RabbitSubscriber
 from kin_news_core.messaging.rabbit.dtos import Subscription
 from kin_news_core.reports_building.domain.services import GenerateRequestHandlerService
+from kin_news_core.reports_building.domain.services.datasources.factory import DataSourceFactory
+from kin_news_core.reports_building.domain.services.datasources.interface import IDataSourceFactory
 from kin_news_core.reports_building.domain.services.model_registration import ModelTypeRegistrationService
 from kin_news_core.reports_building.domain.services.predicting.predictor import IPredictorFactory
 from kin_news_core.reports_building.domain.services.validation.factory_interface import BaseValidatorFactory
-from kin_news_core.telegram import TelegramClientProxy
 from kin_news_core.reports_building.infrastructure.services import StatisticsService, ModelTypesService
 from kin_news_core.reports_building.events import GenerateReportRequestOccurred, ModelValidationRequestOccurred
 from kin_news_core.reports_building.domain.services.validation import ModelValidationService
@@ -62,20 +63,16 @@ class Messaging(containers.DeclarativeContainer):
     )
 
 
-class Clients(containers.DeclarativeContainer):
+class Factories(containers.DeclarativeContainer):
     config = providers.Configuration()
 
-    telegram_client: providers.Factory[TelegramClientProxy] = providers.Factory(
-        TelegramClientProxy,
-        session_str=config.telegram.session_string,
-        api_id=config.telegram.api_id,
-        api_hash=config.telegram.api_hash,
-    )
-
-
-class Factories(containers.DeclarativeContainer):
     validator_factory: providers.Singleton[BaseValidatorFactory] = providers.Singleton(
         BaseValidatorFactory,
+    )
+
+    datasource_factory: providers.Singleton[IDataSourceFactory] = providers.Singleton(
+        DataSourceFactory,
+        settings=config,
     )
 
 
@@ -97,7 +94,6 @@ class Services(containers.DeclarativeContainer):
 
 class DomainServices(containers.DeclarativeContainer):
     config = providers.Configuration()
-    clients = providers.DependenciesContainer()
     services = providers.DependenciesContainer()
     messaging = providers.DependenciesContainer()
     factories = providers.DependenciesContainer()
@@ -123,20 +119,20 @@ class DomainServices(containers.DeclarativeContainer):
 
     generate_statistics_report_service: providers.Singleton[GenerateStatisticalReportService] = providers.Singleton(
         GenerateStatisticalReportService,
-        telegram_client=clients.telegram_client,
         events_producer=messaging.producer,
         statistics_service=services.statistics_service,
         model_types_service=services.model_types_service,
         predictor_factory=predictor_factory,
+        datasource_factory=factories.datasource_factory,
     )
 
     generate_word_cloud_report_service: providers.Singleton[GenerateWordCloudReportService] = providers.Singleton(
         GenerateWordCloudReportService,
-        telegram_client=clients.telegram_client,
         events_producer=messaging.producer,
         statistics_service=services.statistics_service,
         model_types_service=services.model_types_service,
         predictor_factory=predictor_factory,
+        datasource_factory=factories.datasource_factory,
     )
 
 
@@ -149,11 +145,6 @@ class Container(containers.DeclarativeContainer):
         config=config,
     )
 
-    clients: providers.Container[Clients] = providers.Container(
-        Clients,
-        config=config,
-    )
-
     services: providers.Container[Services] = providers.Container(
         Services,
         config=config,
@@ -161,12 +152,12 @@ class Container(containers.DeclarativeContainer):
 
     factories: providers.Container[Factories] = providers.Container(
         Factories,
+        config=config,
     )
 
     domain_services: providers.Container[DomainServices] = providers.Container(
         DomainServices,
         config=config,
-        clients=clients,
         services=services,
         messaging=messaging,
         factories=factories,
