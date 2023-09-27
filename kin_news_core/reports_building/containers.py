@@ -64,15 +64,12 @@ class Messaging(containers.DeclarativeContainer):
 
 
 class Factories(containers.DeclarativeContainer):
-    config = providers.Configuration()
-
     validator_factory: providers.Singleton[BaseValidatorFactory] = providers.Singleton(
         BaseValidatorFactory,
     )
 
     datasource_factory: providers.Singleton[IDataSourceFactory] = providers.Singleton(
         DataSourceFactory,
-        settings=config,
     )
 
 
@@ -152,7 +149,6 @@ class Container(containers.DeclarativeContainer):
 
     factories: providers.Container[Factories] = providers.Container(
         Factories,
-        config=config,
     )
 
     domain_services: providers.Container[DomainServices] = providers.Container(
