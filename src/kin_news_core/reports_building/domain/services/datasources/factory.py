@@ -1,6 +1,6 @@
 from typing import NoReturn
 
-from kin_news_core.datasources import TelegramDatasource
+from kin_news_core.datasources.telegram import TelegramDatasource
 from kin_news_core.datasources.common import IDataSource
 from kin_news_core.datasources.constants import DataSourceTypes
 from kin_news_core.reports_building.domain.services.datasources.interface import IDataSourceFactory
