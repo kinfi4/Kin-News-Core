@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "kin-txt"
+name = "kin-txt-core"
 version = "0.1.0"
 description = "Core logic for Kin-Txt services"
 authors = ["kinfi4 <ilyamakarov223@gmail.com>"]
