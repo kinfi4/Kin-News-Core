@@ -11,7 +11,7 @@ class PostgresSettings(BaseSettings):
 
 class AuthSettings(BaseSettings):
     secret_key: str = Field(..., env="SECRET_KEY")
-    token_life_minutes: int = Field(..., env="TOKEN_LIFE_MINUTES")
+    token_life_minutes: int = Field(12*60, env="TOKEN_LIFE_MINUTES")
 
 
 class RedisSettings(BaseSettings):
