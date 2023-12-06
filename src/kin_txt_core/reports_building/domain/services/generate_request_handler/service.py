@@ -54,4 +54,3 @@ class GenerateRequestHandlerService:
             return generate_statistical_report_task
 
         raise RuntimeError('Unknown report type provided!')
-
