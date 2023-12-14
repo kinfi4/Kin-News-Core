@@ -5,7 +5,7 @@
 __pycache__
 db.sqlite3
 
-kin_news_core/run.py
+kin_txt_core/run.py
 *.session
 
 #static
