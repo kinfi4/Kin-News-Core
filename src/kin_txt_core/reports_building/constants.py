@@ -4,8 +4,6 @@ REPORTS_BUILDER_EXCHANGE = "ReportsBuilder"
 REPORTS_STORING_EXCHANGE = "ReportsStoring"
 MODEL_TYPES_EXCHANGE = "ModelTypes"
 
-GENERIC_MODEL_TYPE = "GenericModel"
-
 
 class ReportTypes(str, Enum):
     STATISTICAL = "Statistical"
@@ -28,4 +26,4 @@ class ModelStatuses(str, Enum):
 class ModelTypes(str, Enum):
     SKLEARN = "Sklearn Model"
     KERAS = "Keras Model"
-    CUSTOM = "Custom Model"
+    BUILTIN = "Built-in Model"

@@ -1,7 +1,7 @@
 import logging
 
 from kin_txt_core.exceptions import ServiceProxyError, ServiceProxyDuplicateError
-from kin_txt_core.reports_building.constants import GENERIC_MODEL_TYPE
+from kin_txt_core.reports_building.domain.entities import CustomModelRegistrationEntity
 from kin_txt_core.reports_building.domain.services.predicting import IPredictorFactory
 from kin_txt_core.reports_building.infrastructure.services import ModelTypesService
 
@@ -20,9 +20,12 @@ class ModelTypeRegistrationService:
         self._logger = logging.getLogger(self.__class__.__name__)
 
     def register_model_type(self) -> None:
-        if self._predictor_factory.model_type == GENERIC_MODEL_TYPE:
+        if self._predictor_factory.model_type == "GenericModel":
             self._logger.info(f"[ModelTypeService] Generic model type {self._predictor_factory.model_type} does not require registration")
             return
+
+        if not isinstance(self._predictor_factory.model_type, CustomModelRegistrationEntity):
+            raise ValueError(f"Model type {self._predictor_factory.model_type} is not supported")
 
         try:
             self._model_types_service.register_model_type(self._predictor_factory.model_type)
