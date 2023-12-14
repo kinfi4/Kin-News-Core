@@ -1,7 +1,6 @@
 from abc import ABCMeta, ABC
 
 from kin_txt_core.reports_building.domain.entities import CustomModelRegistrationEntity
-from kin_txt_core.reports_building.constants import GENERIC_MODEL_TYPE
 
 
 class PredictorValidateModelType(ABCMeta):
@@ -18,7 +17,7 @@ class PredictorValidateModelType(ABCMeta):
         if isinstance(model_type, CustomModelRegistrationEntity):
             return
 
-        if isinstance(model_type, str) and model_type == GENERIC_MODEL_TYPE:
+        if isinstance(model_type, str) and model_type == "GenericModel":
             return
 
         raise TypeError("Predictor class model_type_code_list attribute MUST be CustomModelRegistrationEntity or str with GENERIC_MODEL_TYPE value")
