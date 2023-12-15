@@ -3,7 +3,7 @@ from typing import Union
 
 from pydantic import BaseModel, validator
 
-from kin_txt_core.reports_building.constants import ReportTypes
+from kin_txt_core.reports_building.constants import ReportTypes, ModelTypes
 from kin_txt_core.constants import DEFAULT_DATE_FORMAT
 from kin_txt_core.datasources.constants import DataSourceTypes
 
@@ -25,6 +25,7 @@ class GenerateReportEntity(BaseModel):
     end_date: date
     channel_list: list[str]
     datasource_type: DataSourceTypes = DataSourceTypes.TELEGRAM
+    model_type: ModelTypes
     report_type: ReportTypes | None = None
 
     @validator('start_date', pre=True)

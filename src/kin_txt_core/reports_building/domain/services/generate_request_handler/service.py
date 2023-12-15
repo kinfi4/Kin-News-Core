@@ -4,7 +4,7 @@ from typing import cast, Callable
 from celery import Task
 
 from kin_txt_core.constants import DEFAULT_DATE_FORMAT
-from kin_txt_core.reports_building.constants import ReportTypes
+from kin_txt_core.reports_building.constants import ReportTypes, ModelTypes
 from kin_txt_core.reports_building.domain.services.predicting import IPredictorFactory
 from kin_txt_core.reports_building.events import GenerateReportRequestOccurred
 from kin_txt_core.reports_building.infrastructure.services import ModelTypesService
@@ -22,7 +22,7 @@ class GenerateRequestHandlerService:
         self._logger = logging.getLogger(self.__class__.__name__)
 
     def handle_request(self, event: GenerateReportRequestOccurred) -> None:
-        if not self._check_if_model_is_handled(event.username, event.model_code):
+        if not self._predictor_factory.is_handling(event.model_type, event.model_code):
             self._logger.debug(f"[GenerateRequestHandlerService] Current service is not handling model {event.model_code}")
             return
 
@@ -37,12 +37,8 @@ class GenerateRequestHandlerService:
             template_id=event.template_id,
             name=event.name,
             datasource_type=event.datasource_type,
+            model_type=event.model_type,
         )
-
-    def _check_if_model_is_handled(self, username: str, model_code: str) -> bool:
-        model_meta = self._model_types_service.get_model_metadata(username, model_code)
-
-        return self._predictor_factory.is_handling(model_meta["modelType"], model_code)
 
     def _get_celery_task_from_event(self, event: GenerateReportRequestOccurred) -> Callable[..., None]:
         from kin_txt_core.reports_building.tasks import generate_word_cloud_task, generate_statistical_report_task
