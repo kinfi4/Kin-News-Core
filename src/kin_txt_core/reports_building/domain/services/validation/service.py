@@ -22,6 +22,9 @@ class ModelValidationService:
         self._logger = logging.getLogger(self.__class__.__name__)
 
     def validate_model(self, model: ModelEntity) -> None:
+        if not self._validator_factory.is_handling_model_type(model.model_type, model.code):
+            return  # nothing to do here, this model type is not handled by this service
+
         self._events_producer.publish(
             MODEL_TYPES_EXCHANGE,
             [ModelValidationStarted(code=model.code, username=model.owner_username)]
