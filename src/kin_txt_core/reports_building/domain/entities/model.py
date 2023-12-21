@@ -2,6 +2,7 @@ import os
 
 from pydantic import BaseModel, Field
 
+from kin_txt_core.reports_building.domain.entities import PreprocessingConfig
 from kin_txt_core.reports_building.types import CategoryMapping
 from kin_txt_core.reports_building.constants import ModelTypes, ModelStatuses
 
@@ -12,6 +13,7 @@ class ModelValidationEntity(BaseModel):
     owner_username: str = Field(..., alias="ownerUsername")
     model_type: ModelTypes = Field(..., alias="modelType")
     category_mapping: CategoryMapping = Field(..., alias="categoryMapping")
+    preprocessing_config: PreprocessingConfig = Field(..., alias="preprocessingConfig")
 
     class Config:
         allow_population_by_field_name = True

@@ -2,6 +2,7 @@ from typing import Any
 
 from pydantic import BaseModel, root_validator
 
+from .preprocessing import PreprocessingConfig
 from .generate_report import GenerateReportEntity
 from .reports import BaseReport, WordCloudReport, StatisticalReport
 from .model import ModelEntity, ModelValidationEntity, CustomModelRegistrationEntity
