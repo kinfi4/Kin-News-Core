@@ -10,4 +10,3 @@ class PreprocessingConfig(BaseModel):
     remove_html_tags: bool = Field(default=True, alias="removeHtmlTags")
 
     remove_stop_words: bool = Field(default=True, alias="removeStopWords")
-    custom_stop_words: bool = Field(default=False, alias="customStopWords")
