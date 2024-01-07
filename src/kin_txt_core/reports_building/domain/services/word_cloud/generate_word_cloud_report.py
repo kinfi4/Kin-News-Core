@@ -67,7 +67,7 @@ class GenerateWordCloudReportService(IGeneratingReportsService):
             self._logger.info(f"[GenerateWordCloudReportService] Gathered {len(posts)} messages from {source_name}")
 
             for message in posts:
-                message_text_preprocessed = predictor.preprocess_and_lemmatize(message.text)
+                message_text_preprocessed = predictor.preprocess_text(message.text)
 
                 news_category = predictor.predict(message.text)
 

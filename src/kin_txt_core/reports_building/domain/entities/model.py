@@ -32,6 +32,12 @@ class ModelEntity(ModelValidationEntity):
     model_status: ModelStatuses = Field(..., alias="modelStatus")
     validation_message: str | None = Field(None, alias="validationMessage")
 
+    def get_stop_words_path(self, model_storage_path: str) -> str | None:
+        if self.preprocessing_config.remove_stop_words:
+            return os.path.join(model_storage_path, self.owner_username, self.code, "stop_words")
+
+        return None
+
 
 class CustomModelRegistrationEntity(BaseModel):
     name: str
