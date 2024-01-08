@@ -27,3 +27,10 @@ class ModelTypes(str, Enum):
     SKLEARN = "Sklearn Model"
     KERAS = "Keras Model"
     BUILTIN = "Built-in Model"
+
+
+class SupportedLanguages(str, Enum):
+    RU = "ru"
+    EN = "en"
+    UK = "uk"
+    OTHER = "other"
