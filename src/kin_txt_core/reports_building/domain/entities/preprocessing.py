@@ -1,6 +1,13 @@
+from enum import Enum
+
 from pydantic import BaseModel, Field
 
 from kin_txt_core.reports_building.constants import SupportedLanguages
+
+
+class PossiblePaddingTruncating(str, Enum):
+    PRE = "pre"
+    POST = "post"
 
 
 class PreprocessingConfig(BaseModel):
@@ -16,6 +23,10 @@ class PreprocessingConfig(BaseModel):
 
     lemmatize_text: bool = Field(default=False, alias="lemmatizeText")
     language: SupportedLanguages | None = Field(default=None, alias="language")
+
+    max_tokens: int | None = Field(default=None, alias="maxTokens")
+    padding: PossiblePaddingTruncating = Field(default=PossiblePaddingTruncating.PRE, alias="padding")
+    truncating: PossiblePaddingTruncating = Field(default=PossiblePaddingTruncating.PRE, alias="truncating")
 
     class Config:
         allow_population_by_field_name = True
