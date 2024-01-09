@@ -15,7 +15,7 @@ class PreprocessingConfig(BaseModel):
     stop_words_file_original_name: str | None = Field(default=None, alias="stopWordsFileOriginalName")
 
     lemmatize_text: bool = Field(default=False, alias="lemmatizeText")
-    lemmatize_text_lang: SupportedLanguages | None = Field(default=None, alias="lemmatizeTextLang")
+    language: SupportedLanguages | None = Field(default=None, alias="language")
 
     class Config:
         allow_population_by_field_name = True
