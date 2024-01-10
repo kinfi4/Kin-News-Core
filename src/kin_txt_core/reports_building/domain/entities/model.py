@@ -44,6 +44,7 @@ class CustomModelRegistrationEntity(BaseModel):
     code: str
     owner_username: str = Field(..., alias="ownerUsername")
     category_mapping: CategoryMapping = Field(..., alias="categoryMapping")
+    preprocessing_config: PreprocessingConfig = Field(..., alias="preprocessingConfig")
 
     class Config:
         allow_population_by_field_name = True

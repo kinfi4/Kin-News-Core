@@ -14,7 +14,7 @@ class IPredictor(ITextPreprocessor, ABC):
 
 
 class IPredictorFactory(ABC, metaclass=PredictorValidateModelType):
-    model_type: CustomModelRegistrationEntity | Literal["GenericModel"]
+    model_types: list[CustomModelRegistrationEntity] | Literal["GenericModel"]
 
     @abstractmethod
     def create_predictor(self, model_entity: ModelEntity) -> IPredictor:
