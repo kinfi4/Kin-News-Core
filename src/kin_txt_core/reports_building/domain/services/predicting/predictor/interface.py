@@ -2,7 +2,7 @@ from typing import Literal
 from abc import ABC, abstractmethod
 
 from kin_txt_core.reports_building.constants import ModelTypes
-from kin_txt_core.reports_building.domain.entities import ModelEntity, CustomModelRegistrationEntity
+from kin_txt_core.reports_building.domain.entities import ModelEntity, CustomModelRegistrationEntity, GenerateReportEntity
 from kin_txt_core.reports_building.domain.services.predicting.predictor.meta import PredictorValidateModelType
 from kin_txt_core.reports_building.domain.services.predicting.preprocessing.interface import ITextPreprocessor
 
@@ -17,7 +17,7 @@ class IPredictorFactory(ABC, metaclass=PredictorValidateModelType):
     model_types: list[CustomModelRegistrationEntity] | Literal["GenericModel"]
 
     @abstractmethod
-    def create_predictor(self, model_entity: ModelEntity) -> IPredictor:
+    def create_predictor(self, model_entity: ModelEntity, generation_request: GenerateReportEntity) -> IPredictor:
         pass
 
     @abstractmethod

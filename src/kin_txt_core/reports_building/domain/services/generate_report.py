@@ -56,7 +56,7 @@ class IGeneratingReportsService(ABC):
             model_meta_dict = self._model_types_service.get_model_metadata(username, generate_report_entity.model_code)
             model_meta = ModelEntity(**model_meta_dict)
 
-            predictor = self._initialize_predictor(model_meta)
+            predictor = self._initialize_predictor(model_meta, generate_report_entity)
 
             generate_report_wrapper = GenerationTemplateWrapper(
                 predictor=predictor,
@@ -107,8 +107,8 @@ class IGeneratingReportsService(ABC):
     def _datetime_from_date(self, dt: date, end_of_day: bool = False) -> datetime:
         return datetime(year=dt.year, month=dt.month, day=dt.day) + timedelta(days=int(end_of_day))
 
-    def _initialize_predictor(self, model_entity: ModelEntity) -> IPredictor:
-        return self._predictor_factory.create_predictor(model_entity)
+    def _initialize_predictor(self, model_entity: ModelEntity, generate_entity: GenerateReportEntity) -> IPredictor:
+        return self._predictor_factory.create_predictor(model_entity, generate_entity)
 
     def _publish_report_processing_started(self, report_id: int) -> None:
         event = ReportProcessingStarted(report_id=report_id)
