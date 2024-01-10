@@ -26,3 +26,5 @@ class Settings(BaseSettings):
 
     celery: CelerySettings = CelerySettings()
     telegram: TelegramSettings = TelegramSettings()
+
+    rabbitmq_queue_name: str | None = Field(None, env="RABBITMQ_QUEUE_NAME")

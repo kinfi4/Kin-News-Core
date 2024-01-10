@@ -17,6 +17,7 @@ from kin_txt_core.reports_building.domain.services.validation import ModelValida
 from kin_txt_core.reports_building.domain.services.statistical_report.generate_statistical_report import GenerateStatisticalReportService
 from kin_txt_core.reports_building.domain.services.word_cloud.generate_word_cloud_report import GenerateWordCloudReportService
 from kin_txt_core.reports_building.constants import REPORTS_BUILDER_EXCHANGE
+from kin_txt_core.reports_building.settings import Settings
 
 
 class SubscriberResource(resources.Resource):
@@ -25,7 +26,7 @@ class SubscriberResource(resources.Resource):
         client: RabbitClient,
         additional_subscriptions: Iterable[Subscription] | None = None,
     ) -> AbstractEventSubscriber:
-        subscriber = RabbitSubscriber(client=client)
+        subscriber = RabbitSubscriber(client=client, settings=Settings())
 
         from kin_txt_core.reports_building.events.handlers import (
             on_report_processing_request,

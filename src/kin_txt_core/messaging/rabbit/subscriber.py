@@ -8,6 +8,7 @@ from kin_txt_core.messaging.interfaces import AbstractEventSubscriber, IDeserial
 from kin_txt_core.messaging.rabbit.client import RabbitClient
 from kin_txt_core.messaging.rabbit.dtos import Subscription, EventData
 from kin_txt_core.messaging.rabbit.utils import retry_connect
+from kin_txt_core.reports_building.settings import Settings
 
 _logger = logging.getLogger()
 
@@ -27,9 +28,10 @@ def deserialize_and_callback(event_data: EventData, subscriptions: list[Subscrip
 
 
 class RabbitSubscriber(AbstractEventSubscriber):
-    def __init__(self, client: RabbitClient, deserializer: IDeserializer = JsonSerializer()) -> None:
+    def __init__(self, client: RabbitClient, settings: Settings, deserializer: IDeserializer = JsonSerializer()) -> None:
         self._client = client
         self._deserializer = deserializer
+        self._settings = settings
 
         self._subscriptions: list[Subscription] = []
         self._logger = logging.getLogger(self.__class__.__name__)
@@ -54,7 +56,7 @@ class RabbitSubscriber(AbstractEventSubscriber):
 
             self._client.declare_exchange(exchange)
 
-            queue_name = f"{exchange}-queue"
+            queue_name = self._settings.rabbitmq_queue_name if self._settings.rabbitmq_queue_name is not None else f"{exchange}-queue"
             self._client.declare_queue(queue_name)
 
             self._client.bind_exchange_2_queue(exchange, queue_name)
