@@ -23,7 +23,7 @@ class GenerateRequestHandlerService:
 
     def handle_request(self, event: GenerateReportRequestOccurred) -> None:
         if not self._predictor_factory.is_handling(event.model_type, event.model_code):
-            self._logger.debug(f"[GenerateRequestHandlerService] Current service is not handling model {event.model_code}")
+            self._logger.info(f"[GenerateRequestHandlerService] Current service is not handling model {event.model_code}")
             return
 
         target_task = cast(Task, self._get_celery_task_from_event(event))
