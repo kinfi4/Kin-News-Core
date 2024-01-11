@@ -57,19 +57,21 @@ class GenerateWordCloudReportService(IGeneratingReportsService):
         )
 
         for source_name in generate_report_meta.channel_list:
-            posts = datasource.fetch_data(source=DatasourceLink(
-                source_link=source_name,
-                offset_date=self._datetime_from_date(generate_report_meta.end_date, end_of_day=True),
-                earliest_date=self._datetime_from_date(generate_report_meta.start_date),
-                skip_messages_without_text=True,
-            ))
+            posts = datasource.fetch_data(
+                source=DatasourceLink(
+                    source_link=source_name,
+                    offset_date=self._datetime_from_date(generate_report_meta.end_date, end_of_day=True),
+                    earliest_date=self._datetime_from_date(generate_report_meta.start_date),
+                    skip_messages_without_text=True,
+                ),
+            )
 
             self._logger.info(f"[GenerateWordCloudReportService] Gathered {len(posts)} messages from {source_name}")
 
             for message in posts:
                 message_text_preprocessed = predictor.preprocess_text(message.text)
 
-                news_category = predictor.predict(message.text)
+                news_category = predictor.predict(message)
 
                 message_words = message_text_preprocessed.split()
                 words_counted = Counter(message_words)

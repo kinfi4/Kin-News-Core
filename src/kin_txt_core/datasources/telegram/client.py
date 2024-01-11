@@ -37,7 +37,7 @@ class TelegramDatasource(IDataGetterProxy, IDataSource):
         )
 
         return [
-            ClassificationEntity(text=message.text, created_at=message.created_at) for message in messages
+            ClassificationEntity.from_tg_message_entity(message) for message in messages
         ]
 
     @retry_connection_sync

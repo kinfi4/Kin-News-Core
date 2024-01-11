@@ -2,6 +2,8 @@ from typing import Any
 from datetime import datetime
 from dataclasses import dataclass
 
+from kin_txt_core.datasources.telegram import TelegramMessageEntity
+
 
 @dataclass
 class ClassificationEntity:
@@ -9,6 +11,13 @@ class ClassificationEntity:
     created_at: datetime | None = None
     blobs: list[bytes] | None = None
     metadata: dict[str, Any] | None = None
+
+    @classmethod
+    def from_tg_message_entity(cls, message: TelegramMessageEntity) -> "ClassificationEntity":
+        return cls(
+            text=message.text,
+            created_at=message.created_at,
+        )
 
 
 @dataclass
