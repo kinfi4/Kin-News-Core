@@ -28,7 +28,12 @@ def deserialize_and_callback(event_data: EventData, subscriptions: list[Subscrip
 
 
 class RabbitSubscriber(AbstractEventSubscriber):
-    def __init__(self, client: RabbitClient, settings: Settings, deserializer: IDeserializer = JsonSerializer()) -> None:
+    def __init__(
+        self,
+        client: RabbitClient,
+        settings: Settings | None = None,
+        deserializer: IDeserializer = JsonSerializer(),
+    ) -> None:
         self._client = client
         self._deserializer = deserializer
         self._settings = settings
@@ -56,7 +61,10 @@ class RabbitSubscriber(AbstractEventSubscriber):
 
             self._client.declare_exchange(exchange)
 
-            queue_name = self._settings.rabbitmq_queue_name if self._settings.rabbitmq_queue_name is not None else f"{exchange}-queue"
+            queue_name = f"{exchange}-queue"
+            if self._settings and self._settings.rabbitmq_queue_name:
+                queue_name = self._settings.rabbitmq_queue_name
+
             self._client.declare_queue(queue_name)
 
             self._client.bind_exchange_2_queue(exchange, queue_name)
