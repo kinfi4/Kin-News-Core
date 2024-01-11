@@ -22,12 +22,21 @@ class ServiceProxyDuplicateError(ServiceProxyError):
     pass
 
 
-class TelegramIsUnavailable(KinNewsCoreException):
+class ServiceUnavailable(KinNewsCoreException):
+    pass
+
+
+class TelegramIsUnavailable(ServiceUnavailable):
     seconds_to_wait: int
 
     def __init__(self, msg: str, seconds: int):
         super().__init__(msg)
         self.seconds_to_wait = seconds
+
+
+class RedditIsUnavailable(ServiceUnavailable):
+    def __init__(self, msg: str):
+        super().__init__(msg)
 
 
 class AuthenticationFailedError(KinNewsCoreException):

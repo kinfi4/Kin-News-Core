@@ -10,6 +10,7 @@ from telethon.sessions import StringSession
 from telethon import functions
 
 from kin_txt_core.datasources.common import IDataSource, DatasourceLink, ClassificationEntity
+from kin_txt_core.datasources.settings import TelegramSettings
 from kin_txt_core.exceptions import InvalidChannelURLError, TelegramIsUnavailable
 from kin_txt_core.datasources.telegram.entities import TelegramMessageEntity, TelegramChannelEntity
 from kin_txt_core.constants import MESSAGES_LIMIT_FOR_ONE_CALL
@@ -152,3 +153,12 @@ class TelegramDatasource(IDataGetterProxy, IDataSource):
         asyncio.set_event_loop(loop)
 
         return TelegramClient(self._session_obj, self._api_id, self._api_hash)
+
+    @classmethod
+    def from_settings(cls) -> "TelegramDatasource":
+        settings = TelegramSettings()
+        return cls(
+            session_str=settings.session_string,
+            api_id=settings.api_id,
+            api_hash=settings.api_hash,
+        )

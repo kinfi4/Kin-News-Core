@@ -67,12 +67,14 @@ class GenerateStatisticalReportService(IGeneratingReportsService):
         report_data = self._initialize_report_data_dict(generate_report_wrapper)
 
         for source_name in generate_report_meta.channel_list:
-            posts = datasource.fetch_data(source=DatasourceLink(
-                source_link=source_name,
-                offset_date=self._datetime_from_date(generate_report_meta.end_date, end_of_day=True),
-                earliest_date=self._datetime_from_date(generate_report_meta.start_date),
-                skip_messages_without_text=True,
-            ))
+            posts = datasource.fetch_data(
+                source=DatasourceLink(
+                    source_link=source_name,
+                    offset_date=self._datetime_from_date(generate_report_meta.end_date, end_of_day=True),
+                    earliest_date=self._datetime_from_date(generate_report_meta.start_date),
+                    skip_messages_without_text=True,
+                ),
+            )
 
             self._logger.info(f"[GenerateStatisticalReportService] Gathered {len(posts)} messages from {source_name}")
 
@@ -80,7 +82,7 @@ class GenerateStatisticalReportService(IGeneratingReportsService):
                 message_date_str = message.created_at.date().strftime(DEFAULT_DATE_FORMAT)
                 message_hour = message.created_at.hour
 
-                message_category = predictor.predict(message.text)
+                message_category = predictor.predict(message)
 
                 self._csv_writer.writerow([
                     message_date_str,

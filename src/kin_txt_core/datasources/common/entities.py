@@ -2,6 +2,8 @@ from typing import Any
 from datetime import datetime
 from dataclasses import dataclass
 
+from praw.models import Submission
+
 from kin_txt_core.datasources.telegram import TelegramMessageEntity
 
 
@@ -17,6 +19,13 @@ class ClassificationEntity:
         return cls(
             text=message.text,
             created_at=message.created_at,
+        )
+
+    @classmethod
+    def from_reddit_submission(cls, submission: Submission) -> "ClassificationEntity":
+        return cls(
+            text=f"{submission.title}\n\n{submission.selftext}",
+            created_at=datetime.fromtimestamp(submission.created_utc),
         )
 
 

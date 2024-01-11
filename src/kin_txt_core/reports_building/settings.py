@@ -25,6 +25,5 @@ class Settings(BaseSettings):
     model_types_service_url: str = Field(..., env="MODEL_TYPES_SERVICE_URL")
 
     celery: CelerySettings = CelerySettings()
-    telegram: TelegramSettings = TelegramSettings()
 
     rabbitmq_queue_name: str | None = Field(None, env="RABBITMQ_QUEUE_NAME")
