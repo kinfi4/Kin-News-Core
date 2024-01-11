@@ -4,8 +4,6 @@ from dataclasses import dataclass
 
 from praw.models import Submission
 
-from kin_txt_core.datasources.telegram import TelegramMessageEntity
-
 
 @dataclass
 class ClassificationEntity:
@@ -15,7 +13,7 @@ class ClassificationEntity:
     metadata: dict[str, Any] | None = None
 
     @classmethod
-    def from_tg_message_entity(cls, message: TelegramMessageEntity) -> "ClassificationEntity":
+    def from_tg_message_entity(cls, message: "TelegramMessageEntity") -> "ClassificationEntity":
         return cls(
             text=message.text,
             created_at=message.created_at,

@@ -7,7 +7,8 @@ import praw
 from praw.exceptions import RedditAPIException
 from praw.models import Submission, Subreddit
 
-from kin_txt_core.datasources.common import IDataSource, DatasourceLink, ClassificationEntity
+from kin_txt_core.datasources.common.entities import DatasourceLink, ClassificationEntity
+from kin_txt_core.datasources.common.interface import IDataSource
 from kin_txt_core.datasources.settings import RedditSettings
 from kin_txt_core.exceptions import RedditIsUnavailable
 

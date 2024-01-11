@@ -2,7 +2,7 @@ import csv
 import tempfile
 from typing import Any, TextIO
 
-from kin_txt_core.datasources.common import DatasourceLink
+from kin_txt_core.datasources.common.entities import DatasourceLink
 from kin_txt_core.messaging import AbstractEventProducer
 from kin_txt_core.constants import DEFAULT_DATE_FORMAT
 from kin_txt_core.reports_building.domain.services.datasources.interface import IDataSourceFactory

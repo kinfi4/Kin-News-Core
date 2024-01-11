@@ -3,7 +3,7 @@ import tempfile
 from collections import Counter
 from typing import Any
 
-from kin_txt_core.datasources.common import DatasourceLink
+from kin_txt_core.datasources.common.entities import DatasourceLink
 from kin_txt_core.messaging import AbstractEventProducer
 from kin_txt_core.reports_building.domain.entities import WordCloudReport, GenerationTemplateWrapper
 from kin_txt_core.reports_building.domain.services.datasources.interface import IDataSourceFactory

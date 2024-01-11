@@ -1,7 +1,7 @@
 from typing import Literal
 from abc import ABC, abstractmethod
 
-from kin_txt_core.datasources.common import ClassificationEntity
+from kin_txt_core.datasources.common.entities import ClassificationEntity
 from kin_txt_core.reports_building.constants import ModelTypes
 from kin_txt_core.reports_building.domain.entities import ModelEntity, CustomModelRegistrationEntity, GenerateReportEntity
 from kin_txt_core.reports_building.domain.services.predicting.predictor.meta import PredictorValidateModelType

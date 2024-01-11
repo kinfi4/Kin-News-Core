@@ -1,6 +1,6 @@
 from kin_txt_core.datasources.reddit import RedditDatasource
 from kin_txt_core.datasources.telegram import TelegramDatasource
-from kin_txt_core.datasources.common import IDataSource
+from kin_txt_core.datasources.common.interface import IDataSource
 from kin_txt_core.datasources.constants import DataSourceTypes
 from kin_txt_core.reports_building.domain.services.datasources.interface import IDataSourceFactory
 

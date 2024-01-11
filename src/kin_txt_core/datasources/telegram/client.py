@@ -9,7 +9,8 @@ from telethon.tl.custom.message import Message
 from telethon.sessions import StringSession
 from telethon import functions
 
-from kin_txt_core.datasources.common import IDataSource, DatasourceLink, ClassificationEntity
+from kin_txt_core.datasources.common.entities import DatasourceLink, ClassificationEntity
+from kin_txt_core.datasources.common.interface import IDataSource
 from kin_txt_core.datasources.settings import TelegramSettings
 from kin_txt_core.exceptions import InvalidChannelURLError, TelegramIsUnavailable
 from kin_txt_core.datasources.telegram.entities import TelegramMessageEntity, TelegramChannelEntity
