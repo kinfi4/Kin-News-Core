@@ -1,6 +1,5 @@
 import time
 import logging
-from datetime import datetime
 from typing import Iterator
 
 import praw
@@ -45,8 +44,8 @@ class RedditDatasource(IDataSource):
                 raise RedditIsUnavailable(f"Reddit rate limited: {str(error)}")
 
             raise
-        except TypeError:  # that means that there are no posts
-            pass
+        except TypeError as error:  # usually that means that there are no posts
+            self._logger.warning(f"[RedditDatasource] {error}")
         except Exception as error:
             self._logger.error(f"[RedditDatasource] Error happened: {error}")
             raise
@@ -56,18 +55,14 @@ class RedditDatasource(IDataSource):
         ]
 
     def _get_posts(self, subreddit: Subreddit, settings: DatasourceLink) -> Iterator[Submission]:
-        last_post_timestamp: int | None = None
-
         for fetched_posts in range(0, self._settings.max_posts_per_request, self._single_request_limit):
-            for post in subreddit.new(limit=self._single_request_limit, before=last_post_timestamp):
+            for post in subreddit.new(limit=self._single_request_limit):
                 if post.created_utc < settings.earliest_date.timestamp():
                     return
                 if post.created_utc > settings.offset_date.timestamp():
                     continue
 
                 yield post
-
-            last_post_timestamp = post.created_utc
 
             time.sleep(1)  # Adjust the delay as per Reddit's rate limits
 
