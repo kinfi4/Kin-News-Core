@@ -27,7 +27,7 @@ def init_containers(
     if additional_subscriptions is not None:
         container.messaging.additional_subscriptions.override(additional_subscriptions)
 
-    container.config.from_pydantic(settings)
+    container.config.from_dict(settings.dict())
     container.init_resources()
 
     container.wire(
