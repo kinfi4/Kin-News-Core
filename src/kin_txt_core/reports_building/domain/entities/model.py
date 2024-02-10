@@ -15,7 +15,7 @@ class ModelValidationEntity(BaseModel):
     category_mapping: CategoryMapping = Field(..., alias="categoryMapping")
     preprocessing_config: PreprocessingConfig = Field(..., alias="preprocessingConfig")
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, protected_namespaces=())
 
     def get_model_directory_path(self, model_storage_path: str) -> str:
         return os.path.join(model_storage_path, self.owner_username, self.code)
@@ -30,6 +30,8 @@ class ModelValidationEntity(BaseModel):
 class ModelEntity(ModelValidationEntity):
     model_status: ModelStatuses = Field(..., alias="modelStatus")
     validation_message: str | None = Field(None, alias="validationMessage")
+
+    model_config = ConfigDict(protected_namespaces=())
 
     def get_stop_words_path(self, model_storage_path: str) -> str | None:
         if self.preprocessing_config.remove_stop_words:

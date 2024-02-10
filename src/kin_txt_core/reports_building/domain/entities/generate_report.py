@@ -27,7 +27,7 @@ class GenerateReportEntity(BaseModel):
     model_type: ModelTypes
     report_type: ReportTypes | None = None
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, protected_namespaces=())
 
     @field_validator("start_date", "end_date", mode="before")
     def validate_and_cast_start_date(cls, value: str | date) -> date:

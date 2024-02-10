@@ -11,11 +11,11 @@ class VisualizationTemplate(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True)
 
-    @model_validator(mode="before")
-    def validate_content_types(cls, values: dict[str, str | list[str]]) -> dict[str, str | list[str]]:
+    @model_validator(mode="after")
+    def validate_content_types(self) -> "VisualizationTemplate":
         content_types_set: set[RawContentTypes] = set()
 
-        for visualization_diagram_type in values.get("visualization_diagram_types"):
+        for visualization_diagram_type in self.visualization_diagram_types:
             if "__" not in visualization_diagram_type:
                 raise ValueError("Invalid visualization_diagram_type")
 
@@ -27,9 +27,9 @@ class VisualizationTemplate(BaseModel):
             else:
                 content_types_set.add(content_type)
 
-        values["content_types"] = list(content_types_set) if content_types_set else None
+        self.content_types = list(content_types_set)
 
-        if not values["content_types"]:
+        if not self.content_types:
             raise ValueError("At least one content type must be selected")
 
-        return values
+        return self
