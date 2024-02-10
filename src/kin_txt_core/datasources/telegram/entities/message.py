@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import ConfigDict, BaseModel, Field
 from telethon.tl.custom.message import Message
 
 from kin_txt_core.datasources.telegram.utils import compose_message_link
@@ -12,9 +12,7 @@ class TelegramMessageEntity(BaseModel):
     channel_title: str = Field(..., alias="channelTitle")
     message_link: str = Field(..., alias="messageLink")
     created_at: datetime = Field(..., alias="createdAt")
-
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
     @classmethod
     def from_telegram_obj(cls, message: Message) -> "TelegramMessageEntity":

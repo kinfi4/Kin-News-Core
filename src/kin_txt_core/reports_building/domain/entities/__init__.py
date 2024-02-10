@@ -1,6 +1,6 @@
 from typing import Any
 
-from pydantic import BaseModel, root_validator
+from pydantic import model_validator, ConfigDict, BaseModel
 
 from .preprocessing import PreprocessingConfig
 from .generate_report import GenerateReportEntity
@@ -18,12 +18,11 @@ class GenerationTemplateWrapper(BaseModel):
     predictor: IPredictor
     visualization_template: VisualizationTemplate | None = None
 
-    @root_validator()
+    @model_validator()
+    @classmethod
     def validate_start_and_end_dates_difference(cls, fields: dict[str, Any]) -> dict[str, Any]:
         if fields["generate_report_metadata"].report_type == ReportTypes.STATISTICAL and fields["generate_report_metadata"].template_id is None:
             raise ValueError("Template id must be specified for statistical report type.")
 
         return fields
-
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)

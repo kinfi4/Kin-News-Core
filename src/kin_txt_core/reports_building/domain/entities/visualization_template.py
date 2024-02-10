@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, root_validator
+from pydantic import ConfigDict, BaseModel, Field, model_validator
 
 from kin_txt_core.types.reports import VisualizationDiagramTypes, RawContentTypes
 
@@ -9,7 +9,9 @@ class VisualizationTemplate(BaseModel):
     content_types: list[RawContentTypes] | None = Field(None, alias="contentTypes")
     visualization_diagram_types: list[VisualizationDiagramTypes] = Field(..., alias="visualizationDiagramTypes")
 
-    @root_validator
+    model_config = ConfigDict(populate_by_name=True)
+
+    @model_validator(mode="before")
     def validate_content_types(cls, values: dict[str, str | list[str]]) -> dict[str, str | list[str]]:
         content_types_set: set[RawContentTypes] = set()
 
@@ -31,6 +33,3 @@ class VisualizationTemplate(BaseModel):
             raise ValueError("At least one content type must be selected")
 
         return values
-
-    class Config:
-        allow_population_by_field_name = True

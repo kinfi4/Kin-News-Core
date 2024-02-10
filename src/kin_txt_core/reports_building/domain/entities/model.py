@@ -1,6 +1,6 @@
 import os
 
-from pydantic import BaseModel, Field
+from pydantic import ConfigDict, BaseModel, Field
 
 from kin_txt_core.reports_building.domain.entities import PreprocessingConfig
 from kin_txt_core.reports_building.types import CategoryMapping
@@ -15,8 +15,7 @@ class ModelValidationEntity(BaseModel):
     category_mapping: CategoryMapping = Field(..., alias="categoryMapping")
     preprocessing_config: PreprocessingConfig = Field(..., alias="preprocessingConfig")
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
     def get_model_directory_path(self, model_storage_path: str) -> str:
         return os.path.join(model_storage_path, self.owner_username, self.code)
@@ -46,5 +45,4 @@ class CustomModelRegistrationEntity(BaseModel):
     category_mapping: CategoryMapping = Field(..., alias="categoryMapping")
     preprocessing_config: PreprocessingConfig = Field(..., alias="preprocessingConfig")
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)

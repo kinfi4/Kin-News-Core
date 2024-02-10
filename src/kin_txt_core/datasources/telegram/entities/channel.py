@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import ConfigDict, BaseModel, Field
 from telethon.tl.types import Channel
 
 from kin_txt_core.datasources.telegram.utils import compose_participants_count
@@ -9,9 +9,7 @@ class TelegramChannelEntity(BaseModel):
     title: str
     description: str
     participants_count: str = Field(..., alias="subscribersNumber")
-
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
     @classmethod
     def from_telegram_obj(cls, channel: Channel, about: str, participants_count: int) -> "TelegramChannelEntity":
