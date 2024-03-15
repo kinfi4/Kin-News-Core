@@ -30,10 +30,10 @@ class GenerateRequestHandlerService:
             self._logger.info(f"[GenerateRequestHandlerService] Current service is not handling model {event.model_code}")
             return
 
-        target_task = self._get_celery_task_from_event(event)
+        target_task = self._get_task_from_event(event)
         target_task(event)
 
-    def _get_celery_task_from_event(self, event: GenerateReportRequestOccurred) -> Callable[..., None]:
+    def _get_task_from_event(self, event: GenerateReportRequestOccurred) -> Callable[..., None]:
         if event.report_type == ReportTypes.WORD_CLOUD:
             return self.generate_word_cloud_task
 
