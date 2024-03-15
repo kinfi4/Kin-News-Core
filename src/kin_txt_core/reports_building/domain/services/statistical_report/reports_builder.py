@@ -29,6 +29,8 @@ class ReportsBuilder:
 
         self._report_data: dict[RawContentTypes, DataByCategory | DataByDateChannelCategory] = {}
 
+        self._report_warning_list: list[str] = []
+
     @classmethod
     def from_report_id(cls, report_id: int) -> Self:
         return cls(report_id=report_id)
@@ -61,6 +63,10 @@ class ReportsBuilder:
         self._failed_reason = reason
         return self
 
+    def set_report_warnings(self, warnings: list[str]) -> Self:
+        self._report_warning_list = warnings
+        return self
+
     def build(self) -> StatisticalReport:
         return StatisticalReport(
             report_id=self._report_id,
@@ -73,4 +79,5 @@ class ReportsBuilder:
             total_messages_count=self._total_messages_count,
             visualization_diagrams_list=self._visualization_diagrams_list,
             data=self._report_data,
+            report_warnings=self._report_warning_list,
         )

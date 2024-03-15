@@ -126,3 +126,9 @@ class IGeneratingReportsService(ABC):
             REPORTS_STORING_EXCHANGE,
             [event],
         )
+
+    def get_not_existing_source_channel_warning(self, source_channel_name: str) -> str:
+        return f"Source channel `{source_channel_name}` does not exist."
+
+    def get_empty_source_channel_warning(self, source_channel_name: str) -> str:
+        return f"Source channel `{source_channel_name}` is empty."

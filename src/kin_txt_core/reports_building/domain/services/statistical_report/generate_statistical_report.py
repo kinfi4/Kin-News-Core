@@ -3,6 +3,7 @@ import tempfile
 from typing import Any, TextIO
 
 from kin_txt_core.datasources.common.entities import DatasourceLink
+from kin_txt_core.exceptions import InvalidChannelURLError
 from kin_txt_core.messaging import AbstractEventProducer
 from kin_txt_core.constants import DEFAULT_DATE_FORMAT
 from kin_txt_core.reports_building.domain.services.datasources.interface import IDataSourceFactory
@@ -54,6 +55,7 @@ class GenerateStatisticalReportService(IGeneratingReportsService):
             .set_report_name(generate_report_entity.generate_report_metadata.name)
             .set_total_messages_count(report_data["total_messages"])
             .set_data(report_data["data"])
+            .set_report_warnings(report_data["warnings"])
             .build()
         )
 
@@ -67,14 +69,24 @@ class GenerateStatisticalReportService(IGeneratingReportsService):
         report_data = self._initialize_report_data_dict(generate_report_wrapper)
 
         for source_name in generate_report_meta.channel_list:
-            posts = datasource.fetch_data(
-                source=DatasourceLink(
-                    source_link=source_name,
-                    offset_date=self._datetime_from_date(generate_report_meta.end_date, end_of_day=True),
-                    earliest_date=self._datetime_from_date(generate_report_meta.start_date),
-                    skip_messages_without_text=True,
-                ),
-            )
+            try:
+                posts = datasource.fetch_data(
+                    source=DatasourceLink(
+                        source_link=source_name,
+                        offset_date=self._datetime_from_date(generate_report_meta.end_date, end_of_day=True),
+                        earliest_date=self._datetime_from_date(generate_report_meta.start_date),
+                        skip_messages_without_text=True,
+                    ),
+                )
+            except InvalidChannelURLError:
+                self._logger.warning(f"[GenerateStatisticalReportService] Invalid channel URL: {source_name}")
+                report_data["warnings"].append(self.get_not_existing_source_channel_warning(source_name))
+                continue
+
+            if not posts:
+                self._logger.warning(f"[GenerateStatisticalReportService] No messages from {source_name}")
+                report_data["warnings"].append(self.get_not_existing_source_channel_warning(source_name))
+                continue
 
             self._logger.info(f"[GenerateStatisticalReportService] Gathered {len(posts)} messages from {source_name}")
 
@@ -157,6 +169,7 @@ class GenerateStatisticalReportService(IGeneratingReportsService):
         return {
             "total_messages": 0,
             "data": _report_data,
+            "warnings": [],
         }
 
     def _initialize_diagram_type(

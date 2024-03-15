@@ -4,6 +4,7 @@ from collections import Counter
 from typing import Any
 
 from kin_txt_core.datasources.common.entities import DatasourceLink
+from kin_txt_core.exceptions import InvalidChannelURLError
 from kin_txt_core.messaging import AbstractEventProducer
 from kin_txt_core.reports_building.domain.entities import WordCloudReport
 from kin_txt_core.reports_building.domain.entities.generation_template_wrapper import GenerationTemplateWrapper
@@ -47,7 +48,9 @@ class GenerateWordCloudReportService(IGeneratingReportsService):
         )
 
     def __gather_data(self, generate_report_wrapper: GenerationTemplateWrapper) -> dict[str, Any]:
-        datasource = self._datasource_factory.get_data_source(generate_report_wrapper.generate_report_metadata.datasource_type)
+        datasource = self._datasource_factory.get_data_source(
+            generate_report_wrapper.generate_report_metadata.datasource_type
+        )
 
         generate_report_meta = generate_report_wrapper.generate_report_metadata
         predictor = generate_report_wrapper.predictor
@@ -58,14 +61,24 @@ class GenerateWordCloudReportService(IGeneratingReportsService):
         )
 
         for source_name in generate_report_meta.channel_list:
-            posts = datasource.fetch_data(
-                source=DatasourceLink(
-                    source_link=source_name,
-                    offset_date=self._datetime_from_date(generate_report_meta.end_date, end_of_day=True),
-                    earliest_date=self._datetime_from_date(generate_report_meta.start_date),
-                    skip_messages_without_text=True,
-                ),
-            )
+            try:
+                posts = datasource.fetch_data(
+                    source=DatasourceLink(
+                        source_link=source_name,
+                        offset_date=self._datetime_from_date(generate_report_meta.end_date, end_of_day=True),
+                        earliest_date=self._datetime_from_date(generate_report_meta.start_date),
+                        skip_messages_without_text=True,
+                    ),
+                )
+            except InvalidChannelURLError:
+                self._logger.warning(f"[GenerateWordCloudReportService] Invalid channel URL: {source_name}")
+                _data["warnings"].append(self.get_not_existing_source_channel_warning(source_name))
+                continue
+
+            if not posts:
+                self._logger.warning(f"[GenerateWordCloudReportService] No messages from {source_name}")
+                _data["warnings"].append(self.get_not_existing_source_channel_warning(source_name))
+                continue
 
             self._logger.info(f"[GenerateWordCloudReportService] Gathered {len(posts)} messages from {source_name}")
 
@@ -134,5 +147,6 @@ class GenerateWordCloudReportService(IGeneratingReportsService):
                 channel_name: {
                     news_category: Counter() for news_category in categories
                 } for channel_name in channels
-            }
+            },
+            "warnings": [],
         }

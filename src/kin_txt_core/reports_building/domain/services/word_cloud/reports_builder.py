@@ -26,6 +26,8 @@ class WordCloudReportBuilder:
         self._data_by_category: Optional[dict] = None
         self._total_words_frequency: Optional[list[tuple[str, int]]] = None
 
+        self._report_warning_list: list[str] = []
+
     @classmethod
     def from_report_id(cls, report_id: int) -> Self:
         return cls(report_id=report_id)
@@ -66,6 +68,10 @@ class WordCloudReportBuilder:
         self._total_words_frequency = data
         return self
 
+    def set_report_warnings(self, warnings: list[str]) -> Self:
+        self._report_warning_list = warnings
+        return self
+
     def build(self) -> WordCloudReport:
         return WordCloudReport(
             report_id=self._report_id,
@@ -80,4 +86,5 @@ class WordCloudReportBuilder:
             data_by_channel_by_category=self._data_by_channel_by_category,
             total_words_frequency=self._total_words_frequency,
             posts_categories=self._posts_categories,
+            report_warnings=self._report_warning_list,
         )

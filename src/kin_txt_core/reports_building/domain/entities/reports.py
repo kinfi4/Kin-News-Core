@@ -24,6 +24,7 @@ class BaseReport(BaseModel):
     generation_date: datetime = Field(..., alias="generationDate")
 
     report_failed_reason: str | None = Field(None, alias="reportFailedReason")
+    report_warnings: list[str] | None = Field(None, alias="reportWarnings")
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -49,19 +50,6 @@ class StatisticalReport(BaseReport):
     data: dict[RawContentTypes, DataByCategory | DataByDateChannelCategory] | None = Field(None, alias="data")
     model_config = ConfigDict(populate_by_name=True)
 
-    @classmethod
-    def from_dict(cls, dict_report: dict[str, Any]) -> "StatisticalReport":
-        return cls(
-            report_id=dict_report["report_id"],
-            report_type=dict_report["report_type"],
-            name=dict_report["name"],
-            processing_status=dict_report["processing_status"],
-            report_failed_reason=dict_report["report_failed_reason"],
-            total_messages_count=dict_report["total_messages_count"],
-            set_of_visualization_diagrams=dict_report["set_of_visualization_diagrams"],
-            data=dict_report["data"],
-        )
-
 
 class WordCloudReport(BaseReport):
     posts_categories: list[str] | None = Field(None, alias="postsCategories")
@@ -79,18 +67,3 @@ class WordCloudReport(BaseReport):
     ] = Field(None, alias="dataByChannelByCategory")
 
     model_config = ConfigDict(populate_by_name=True)
-
-    @classmethod
-    def from_dict(cls, dict_report: dict[str, Any]) -> "WordCloudReport":
-        return cls(
-            report_id=dict_report["report_id"],
-            report_type=dict_report["report_type"],
-            name=dict_report["name"],
-            processing_status=dict_report["processing_status"],
-            report_failed_reason=dict_report.get("report_failed_reason"),
-            total_words=dict_report.get("total_words"),
-            data_by_channel_by_category=dict_report.get("data_by_channel_by_category"),
-            data_by_category=dict_report.get("data_by_category"),
-            data_by_channel=dict_report.get("data_by_channel"),
-            total_words_frequency=dict_report.get("total_words_frequency"),
-        )
