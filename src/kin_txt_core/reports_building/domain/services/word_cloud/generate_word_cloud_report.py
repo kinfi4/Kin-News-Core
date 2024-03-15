@@ -44,6 +44,7 @@ class GenerateWordCloudReportService(IGeneratingReportsService):
             .set_data_by_channel(gathered_results["data_by_channel"])
             .set_total_words_frequency(gathered_results["total_words_frequency"])
             .set_data_by_channel_by_category(gathered_results["data_by_channel_by_category"])
+            .set_report_warnings(gathered_results["warnings"])
             .build()
         )
 
@@ -108,6 +109,7 @@ class GenerateWordCloudReportService(IGeneratingReportsService):
             "data_by_category": self._truncate_only_most_popular_words(_data["data_by_category"]),
             "data_by_channel": self._truncate_only_most_popular_words(_data["data_by_channel"]),
             "total_words_frequency": _data["total_words_frequency"].most_common(self._MAX_MOST_COMMON_WORDS),
+            "warnings": _data["warnings"],
         }
 
     def _save_word_cloud_data_to_file(self, report_id: int, _data: dict[str, int]) -> None:
