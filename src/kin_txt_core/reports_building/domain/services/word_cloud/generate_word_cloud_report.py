@@ -5,7 +5,8 @@ from typing import Any
 
 from kin_txt_core.datasources.common.entities import DatasourceLink
 from kin_txt_core.messaging import AbstractEventProducer
-from kin_txt_core.reports_building.domain.entities import WordCloudReport, GenerationTemplateWrapper
+from kin_txt_core.reports_building.domain.entities import WordCloudReport
+from kin_txt_core.reports_building.domain.entities.generation_template_wrapper import GenerationTemplateWrapper
 from kin_txt_core.reports_building.domain.services.datasources.interface import IDataSourceFactory
 from kin_txt_core.reports_building.domain.services.generate_report import IGeneratingReportsService
 from kin_txt_core.reports_building.domain.services.predicting.predictor import IPredictorFactory

@@ -9,9 +9,9 @@ from kin_txt_core.reports_building.domain.entities import (
     GenerateReportEntity,
     WordCloudReport,
     StatisticalReport,
-    GenerationTemplateWrapper,
     VisualizationTemplate, ModelEntity,
 )
+from kin_txt_core.reports_building.domain.entities.generation_template_wrapper import GenerationTemplateWrapper
 from kin_txt_core.reports_building.events import (
     ReportProcessingStarted,
     WordCloudReportProcessingFinished,

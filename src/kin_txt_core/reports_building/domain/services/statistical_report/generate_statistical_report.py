@@ -12,9 +12,9 @@ from kin_txt_core.types.reports import RawContentTypes
 from kin_txt_core.reports_building.domain.entities import (
     GenerateReportEntity,
     StatisticalReport,
-    GenerationTemplateWrapper,
     ModelEntity,
 )
+from kin_txt_core.reports_building.domain.entities.generation_template_wrapper import GenerationTemplateWrapper
 from kin_txt_core.reports_building.domain.services.generate_report import IGeneratingReportsService
 from kin_txt_core.reports_building.domain.services.statistical_report.reports_builder import ReportsBuilder
 from kin_txt_core.reports_building.infrastructure.services import StatisticsService, ModelTypesService
