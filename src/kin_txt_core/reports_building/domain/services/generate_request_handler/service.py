@@ -1,10 +1,9 @@
 import logging
 from typing import cast, Callable
 
-from celery import Task
-
-from kin_txt_core.constants import DEFAULT_DATE_FORMAT
-from kin_txt_core.reports_building.constants import ReportTypes, ModelTypes
+from kin_txt_core.reports_building.constants import ReportTypes
+from kin_txt_core.reports_building.domain.entities import GenerateReportEntity
+from kin_txt_core.reports_building.domain.services.generate_report import IGeneratingReportsService
 from kin_txt_core.reports_building.domain.services.predicting import IPredictorFactory
 from kin_txt_core.reports_building.events import GenerateReportRequestOccurred
 from kin_txt_core.reports_building.infrastructure.services import ModelTypesService
@@ -15,9 +14,14 @@ class GenerateRequestHandlerService:
         self,
         predictor_factory: IPredictorFactory,
         model_types_service: ModelTypesService,
+        generating_reports_service: IGeneratingReportsService,
+        generating_word_cloud_service: IGeneratingReportsService,
     ) -> None:
         self._predictor_factory = predictor_factory
         self._model_types_service = model_types_service
+
+        self._generating_reports_service = generating_reports_service
+        self._generating_word_cloud_service = generating_word_cloud_service
 
         self._logger = logging.getLogger(self.__class__.__name__)
 
@@ -26,27 +30,24 @@ class GenerateRequestHandlerService:
             self._logger.info(f"[GenerateRequestHandlerService] Current service is not handling model {event.model_code}")
             return
 
-        target_task = cast(Task, self._get_celery_task_from_event(event))
-        target_task.delay(
-            start_date=event.start_date.strftime(DEFAULT_DATE_FORMAT),
-            end_date=event.end_date.strftime(DEFAULT_DATE_FORMAT),
-            channel_list=event.channel_list,
-            username=event.username,
-            report_id=event.report_id,
-            model_code=event.model_code,
-            template_id=event.template_id,
-            name=event.name,
-            datasource_type=event.datasource_type,
-            model_type=event.model_type,
-        )
+        target_task = self._get_celery_task_from_event(event)
+        target_task(event)
 
     def _get_celery_task_from_event(self, event: GenerateReportRequestOccurred) -> Callable[..., None]:
-        from kin_txt_core.reports_building.tasks import generate_word_cloud_task, generate_statistical_report_task
-
         if event.report_type == ReportTypes.WORD_CLOUD:
-            return generate_word_cloud_task
+            return self.generate_word_cloud_task
 
         if event.report_type == ReportTypes.STATISTICAL:
-            return generate_statistical_report_task
+            return self.generate_statistical_report_task
 
         raise RuntimeError('Unknown report type provided!')
+
+    def generate_statistical_report_task(self, generation_request: GenerateReportEntity) -> None:
+        self._logger.info("Instantiating generate report entity and running the processing...")
+
+        self._generating_reports_service.generate_report(cast(GenerateReportEntity, generation_request))
+
+    def generate_word_cloud_task(self, generation_request: GenerateReportEntity) -> None:
+        self._logger.info("Instantiating generate report entity and running the processing...")
+
+        self._generating_word_cloud_service.generate_report(cast(GenerateReportEntity, generation_request))

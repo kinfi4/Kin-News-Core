@@ -109,12 +109,6 @@ class DomainServices(containers.DeclarativeContainer):
         model_types_service=services.model_types_service,
     )
 
-    generate_request_handler_service: providers.Singleton[GenerateRequestHandlerService] = providers.Singleton(
-        GenerateRequestHandlerService,
-        predictor_factory=predictor_factory,
-        model_types_service=services.model_types_service,
-    )
-
     generate_statistics_report_service: providers.Singleton[GenerateStatisticalReportService] = providers.Singleton(
         GenerateStatisticalReportService,
         events_producer=messaging.producer,
@@ -131,6 +125,14 @@ class DomainServices(containers.DeclarativeContainer):
         model_types_service=services.model_types_service,
         predictor_factory=predictor_factory,
         datasource_factory=factories.datasource_factory,
+    )
+
+    generate_request_handler_service: providers.Singleton[GenerateRequestHandlerService] = providers.Singleton(
+        GenerateRequestHandlerService,
+        predictor_factory=predictor_factory,
+        model_types_service=services.model_types_service,
+        generating_reports_service=generate_statistics_report_service,
+        generating_word_cloud_service=generate_word_cloud_report_service,
     )
 
 

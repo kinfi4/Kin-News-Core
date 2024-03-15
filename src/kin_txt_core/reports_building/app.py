@@ -6,10 +6,9 @@ from kin_txt_core.reports_building.domain.services.predicting.predictor import I
 from kin_txt_core.reports_building.domain.services.validation.factory_interface import BaseValidatorFactory
 from kin_txt_core.reports_building.settings import Settings
 from kin_txt_core.reports_building.containers import Container
-from kin_txt_core.reports_building import tasks
 from kin_txt_core.reports_building import events, domain
 
-__all__ = ["run_celery", "run_consumer"]
+__all__ = ["run_consumer"]
 
 _logger = logging.getLogger(__name__)
 
@@ -32,28 +31,11 @@ def init_containers(
 
     container.wire(
         packages=[domain, events],
-        modules=[tasks],
     )
 
     container.check_dependencies()
 
     return container
-
-
-def run_celery(
-    predictor_factory: IPredictorFactory,
-    validator_factory: BaseValidatorFactory | None = None,
-    celery_run_command: list[str] | None = None,
-) -> None:
-    if celery_run_command is None:
-        celery_run_command = ["worker", "-l", "info"]
-
-    settings = Settings()
-    _ = init_containers(settings, predictor_factory, validator_factory)
-
-    from kin_txt_core.reports_building.tasks import celery_app
-
-    celery_app.worker_main(celery_run_command)
 
 
 def run_consumer(
