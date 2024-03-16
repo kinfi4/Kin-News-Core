@@ -14,8 +14,11 @@ from kin_txt_core.reports_building.domain.services.validation.factory_interface 
 from kin_txt_core.reports_building.infrastructure.services import StatisticsService, ModelTypesService
 from kin_txt_core.reports_building.events import GenerateReportRequestOccurred, ModelValidationRequestOccurred
 from kin_txt_core.reports_building.domain.services.validation import ModelValidationService
-from kin_txt_core.reports_building.domain.services.statistical_report.generate_statistical_report import GenerateStatisticalReportService
-from kin_txt_core.reports_building.domain.services.word_cloud.generate_word_cloud_report import GenerateWordCloudReportService
+from kin_txt_core.reports_building.domain.services.statistical_report.statistical_strategy import StatisticalStrategy
+from kin_txt_core.reports_building.domain.services.word_cloud.wc_token_classification_strategy import (
+    BuildWordCloudTokenClassificationStrategy
+)
+from kin_txt_core.reports_building.domain.services.word_cloud.wc_strategy import WordCloudStrategy
 from kin_txt_core.reports_building.constants import REPORTS_BUILDER_EXCHANGE
 from kin_txt_core.reports_building.settings import Settings
 
@@ -109,8 +112,8 @@ class DomainServices(containers.DeclarativeContainer):
         model_types_service=services.model_types_service,
     )
 
-    generate_statistics_report_service: providers.Factory[GenerateStatisticalReportService] = providers.Factory(
-        GenerateStatisticalReportService,
+    statistical_report_service: providers.Factory[StatisticalStrategy] = providers.Factory(
+        StatisticalStrategy,
         events_producer=messaging.producer,
         statistics_service=services.statistics_service,
         model_types_service=services.model_types_service,
@@ -118,8 +121,17 @@ class DomainServices(containers.DeclarativeContainer):
         datasource_factory=factories.datasource_factory,
     )
 
-    generate_word_cloud_report_service: providers.Factory[GenerateWordCloudReportService] = providers.Factory(
-        GenerateWordCloudReportService,
+    word_cloud_service: providers.Factory[WordCloudStrategy] = providers.Factory(
+        WordCloudStrategy,
+        events_producer=messaging.producer,
+        statistics_service=services.statistics_service,
+        model_types_service=services.model_types_service,
+        predictor_factory=predictor_factory,
+        datasource_factory=factories.datasource_factory,
+    )
+
+    word_cloud_token_classification_service: providers.Factory[BuildWordCloudTokenClassificationStrategy] = providers.Factory(
+        BuildWordCloudTokenClassificationStrategy,
         events_producer=messaging.producer,
         statistics_service=services.statistics_service,
         model_types_service=services.model_types_service,
@@ -131,8 +143,9 @@ class DomainServices(containers.DeclarativeContainer):
         GenerateRequestHandlerService,
         predictor_factory=predictor_factory,
         model_types_service=services.model_types_service,
-        generating_reports_service=generate_statistics_report_service,
-        generating_word_cloud_service=generate_word_cloud_report_service,
+        statistical_reports_service=statistical_report_service,
+        word_cloud_service=word_cloud_service,
+        word_cloud_token_classification_service=word_cloud_token_classification_service
     )
 
 

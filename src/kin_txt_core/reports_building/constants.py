@@ -34,3 +34,8 @@ class SupportedLanguages(str, Enum):
     EN = "en"
     UK = "uk"
     OTHER = "other"
+
+
+class ClassificationScopes(str, Enum):
+    ENTIRE_POST = "entire_post"
+    TOKENS = "tokens"

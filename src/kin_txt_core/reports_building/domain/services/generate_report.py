@@ -112,16 +112,16 @@ class IGeneratingReportsService(ABC):
 
                 total_posts.extend(source_posts)  # Append all posts from the source to the total list
             except InvalidChannelURLError:
-                self._logger.warning(f"[BuildWordCloudReportStrategy] Invalid channel URL: {source_name}")
+                self._logger.warning(f"[WordCloudStrategy] Invalid channel URL: {source_name}")
                 self._report_generation_warnings.append(self.get_not_existing_source_channel_warning(source_name))
                 continue
 
             if not source_posts:
-                self._logger.warning(f"[BuildWordCloudReportStrategy] No messages from {source_name}")
+                self._logger.warning(f"[WordCloudStrategy] No messages from {source_name}")
                 self._report_generation_warnings.append(self.get_not_existing_source_channel_warning(source_name))
                 continue
 
-            self._logger.info(f"[BuildWordCloudReportStrategy] Gathered {len(source_posts)} messages from {source_name}")
+            self._logger.info(f"[WordCloudStrategy] Gathered {len(source_posts)} messages from {source_name}")
 
         return total_posts
 

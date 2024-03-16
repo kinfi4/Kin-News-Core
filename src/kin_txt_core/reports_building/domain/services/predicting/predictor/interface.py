@@ -10,7 +10,11 @@ from kin_txt_core.reports_building.domain.services.predicting.preprocessing.inte
 
 class IPredictor(ITextPreprocessor, ABC):
     @abstractmethod
-    def predict(self, entity: ClassificationEntity) -> str:
+    def predict_post(self, entity: ClassificationEntity) -> str:
+        pass
+
+    @abstractmethod
+    def predict_post_tokens(self, entity: ClassificationEntity) -> dict[str, list[str]]:
         pass
 
 

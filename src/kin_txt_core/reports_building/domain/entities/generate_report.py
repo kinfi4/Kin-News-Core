@@ -2,7 +2,7 @@ from datetime import date, datetime
 
 from pydantic import ConfigDict, BaseModel, field_validator
 
-from kin_txt_core.reports_building.constants import ReportTypes, ModelTypes
+from kin_txt_core.reports_building.constants import ReportTypes, ModelTypes, ClassificationScopes
 from kin_txt_core.constants import DEFAULT_DATE_FORMAT
 from kin_txt_core.datasources.constants import DataSourceTypes
 
@@ -26,6 +26,7 @@ class GenerateReportEntity(BaseModel):
     datasource_type: DataSourceTypes = DataSourceTypes.TELEGRAM
     model_type: ModelTypes
     report_type: ReportTypes | None = None
+    classification_scope: ClassificationScopes = ClassificationScopes.ENTIRE_POST
 
     model_config = ConfigDict(populate_by_name=True, protected_namespaces=())
 

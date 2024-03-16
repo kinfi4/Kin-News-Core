@@ -3,7 +3,6 @@ import tempfile
 from typing import Any, TextIO
 
 from kin_txt_core.datasources.common.entities import ClassificationEntity
-from kin_txt_core.exceptions import InvalidChannelURLError
 from kin_txt_core.messaging import AbstractEventProducer
 from kin_txt_core.constants import DEFAULT_DATE_FORMAT
 from kin_txt_core.reports_building.domain.services.datasources.interface import IDataSourceFactory
@@ -13,7 +12,7 @@ from kin_txt_core.types.reports import RawContentTypes
 from kin_txt_core.reports_building.domain.entities import (
     GenerateReportEntity,
     StatisticalReport,
-    ModelEntity, WordCloudReport,
+    ModelEntity,
 )
 from kin_txt_core.reports_building.domain.entities.generation_template_wrapper import GenerationTemplateWrapper
 from kin_txt_core.reports_building.domain.services.generate_report import IGeneratingReportsService
@@ -21,7 +20,7 @@ from kin_txt_core.reports_building.domain.services.statistical_report.reports_bu
 from kin_txt_core.reports_building.infrastructure.services import StatisticsService, ModelTypesService
 
 
-class BuildStatisticalReportStrategy(IGeneratingReportsService):
+class StatisticalStrategy(IGeneratingReportsService):
     reports_builder = StatisticalReportsBuilder
 
     def __init__(
@@ -70,14 +69,14 @@ class BuildStatisticalReportStrategy(IGeneratingReportsService):
             message_date_str = message.created_at.date().strftime(DEFAULT_DATE_FORMAT)
             message_hour = message.created_at.hour
 
-            message_category = predictor.predict(message)
+            category = predictor.predict_post(message)
 
             self._csv_writer.writerow([
                 message_date_str,
                 source_name,
                 message_hour,
                 message.text,
-                message_category,
+                category,
             ])
 
             _data["total_messages"] += 1
@@ -86,9 +85,9 @@ class BuildStatisticalReportStrategy(IGeneratingReportsService):
                 if content_type == RawContentTypes.BY_CHANNEL:
                     _data["data"][content_type][source_name] += 1
                 elif content_type == RawContentTypes.BY_CATEGORY:
-                    _data["data"][content_type][message_category] += 1
+                    _data["data"][content_type][category] += 1
                 elif content_type == RawContentTypes.BY_CHANNEL_BY_CATEGORY:
-                    _data["data"][content_type][source_name][message_category] += 1
+                    _data["data"][content_type][source_name][category] += 1
                 elif content_type == RawContentTypes.BY_DAY_HOUR:
                     _data["data"][content_type][str(message_hour)] += 1
                 elif content_type == RawContentTypes.BY_DATE:
@@ -100,7 +99,7 @@ class BuildStatisticalReportStrategy(IGeneratingReportsService):
                     if message_date_str not in _data["data"][content_type]:
                         _data["data"][content_type][message_date_str] = {category: 0 for category in posts_category_list}
 
-                    _data["data"][content_type][message_date_str][message_category] += 1
+                    _data["data"][content_type][message_date_str][category] += 1
                 elif content_type == RawContentTypes.BY_DATE_BY_CHANNEL:
                     if message_date_str not in _data["data"][content_type]:
                         _data["data"][content_type][message_date_str] = {

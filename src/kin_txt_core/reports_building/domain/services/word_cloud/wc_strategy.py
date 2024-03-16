@@ -3,10 +3,9 @@ import tempfile
 from collections import Counter
 from typing import Any
 
-from kin_txt_core.datasources.common.entities import DatasourceLink, ClassificationEntity
-from kin_txt_core.exceptions import InvalidChannelURLError
+from kin_txt_core.datasources.common.entities import ClassificationEntity
 from kin_txt_core.messaging import AbstractEventProducer
-from kin_txt_core.reports_building.domain.entities import WordCloudReport, StatisticalReport
+from kin_txt_core.reports_building.domain.entities import WordCloudReport
 from kin_txt_core.reports_building.domain.entities.generation_template_wrapper import GenerationTemplateWrapper
 from kin_txt_core.reports_building.domain.services.datasources.interface import IDataSourceFactory
 from kin_txt_core.reports_building.domain.services.generate_report import IGeneratingReportsService
@@ -17,7 +16,7 @@ from kin_txt_core.reports_building.domain.services.word_cloud.reports_builder im
 from kin_txt_core.reports_building.infrastructure.services import StatisticsService, ModelTypesService
 
 
-class BuildWordCloudReportStrategy(IGeneratingReportsService):
+class WordCloudStrategy(IGeneratingReportsService):
     _MAX_MOST_COMMON_WORDS = 450
     reports_builder = WordCloudReportsBuilder
 
@@ -49,7 +48,7 @@ class BuildWordCloudReportStrategy(IGeneratingReportsService):
             source_name = message.source_name
             message_text_preprocessed = predictor.preprocess_text(message.text)
 
-            news_category = predictor.predict(message)
+            category = predictor.predict_post(message)
 
             message_words = message_text_preprocessed.split()
             words_counted = Counter(message_words)
@@ -60,9 +59,9 @@ class BuildWordCloudReportStrategy(IGeneratingReportsService):
 
             _data["data_by_channel"][source_name].update(words_counted)
 
-            _data["data_by_category"][news_category].update(words_counted)
+            _data["data_by_category"][category].update(words_counted)
 
-            _data["data_by_channel_by_category"][source_name][news_category].update(words_counted)
+            _data["data_by_channel_by_category"][source_name][category].update(words_counted)
 
         self._save_word_cloud_data_to_file(generate_report_meta.report_id, _data)
 
@@ -123,12 +122,11 @@ class BuildWordCloudReportStrategy(IGeneratingReportsService):
                 channel_name: Counter() for channel_name in channels
             },
             "data_by_category": {
-                news_category: Counter() for news_category in categories
+                category: Counter() for category in categories
             },
             "data_by_channel_by_category": {
                 channel_name: {
-                    news_category: Counter() for news_category in categories
+                    category: Counter() for category in categories
                 } for channel_name in channels
             },
-            "warnings": [],
         }
