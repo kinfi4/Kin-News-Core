@@ -9,6 +9,7 @@ from praw.models import Submission
 class ClassificationEntity:
     text: str | None
     created_at: datetime | None = None
+    source_name: str | None = None
     blobs: list[bytes] | None = None
     metadata: dict[str, Any] | None = None
 
@@ -17,6 +18,7 @@ class ClassificationEntity:
         return cls(
             text=message.text,
             created_at=message.created_at,
+            source_name=message.channel_title,
         )
 
     @classmethod
@@ -24,6 +26,7 @@ class ClassificationEntity:
         return cls(
             text=f"{submission.title}\n\n{submission.selftext}",
             created_at=datetime.fromtimestamp(submission.created_utc),
+            source_name=submission.subreddit.display_name,
         )
 
 

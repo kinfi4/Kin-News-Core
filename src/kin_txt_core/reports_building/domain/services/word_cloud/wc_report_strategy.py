@@ -3,10 +3,10 @@ import tempfile
 from collections import Counter
 from typing import Any
 
-from kin_txt_core.datasources.common.entities import DatasourceLink
+from kin_txt_core.datasources.common.entities import DatasourceLink, ClassificationEntity
 from kin_txt_core.exceptions import InvalidChannelURLError
 from kin_txt_core.messaging import AbstractEventProducer
-from kin_txt_core.reports_building.domain.entities import WordCloudReport
+from kin_txt_core.reports_building.domain.entities import WordCloudReport, StatisticalReport
 from kin_txt_core.reports_building.domain.entities.generation_template_wrapper import GenerationTemplateWrapper
 from kin_txt_core.reports_building.domain.services.datasources.interface import IDataSourceFactory
 from kin_txt_core.reports_building.domain.services.generate_report import IGeneratingReportsService
@@ -17,7 +17,7 @@ from kin_txt_core.reports_building.domain.services.word_cloud.reports_builder im
 from kin_txt_core.reports_building.infrastructure.services import StatisticsService, ModelTypesService
 
 
-class GenerateWordCloudReportService(IGeneratingReportsService):
+class BuildWordCloudReportStrategy(IGeneratingReportsService):
     _MAX_MOST_COMMON_WORDS = 450
     reports_builder = WordCloudReportsBuilder
 
@@ -32,27 +32,11 @@ class GenerateWordCloudReportService(IGeneratingReportsService):
         super().__init__(events_producer, model_types_service, predictor_factory, datasource_factory)
         self._statistics_service = statistics_service
 
-    def _build_report_entity(self, generate_report_wrapper: GenerationTemplateWrapper) -> WordCloudReport:
-        gathered_results = self.__gather_data(generate_report_wrapper)
-
-        return (
-            WordCloudReportsBuilder.from_report_id(generate_report_wrapper.generate_report_metadata.report_id)
-            .set_posts_categories([category for category in generate_report_wrapper.model_metadata.category_mapping.values()])
-            .set_report_name(generate_report_wrapper.generate_report_metadata.name)
-            .set_total_words_count(gathered_results["total_words"])
-            .set_data_by_category(gathered_results["data_by_category"])
-            .set_data_by_channel(gathered_results["data_by_channel"])
-            .set_total_words_frequency(gathered_results["total_words_frequency"])
-            .set_data_by_channel_by_category(gathered_results["data_by_channel_by_category"])
-            .set_report_warnings(gathered_results["warnings"])
-            .build()
-        )
-
-    def __gather_data(self, generate_report_wrapper: GenerationTemplateWrapper) -> dict[str, Any]:
-        datasource = self._datasource_factory.get_data_source(
-            generate_report_wrapper.generate_report_metadata.datasource_type
-        )
-
+    def handle_posts(
+        self,
+        posts: list[ClassificationEntity],
+        generate_report_wrapper: GenerationTemplateWrapper,
+    ) -> dict[str, Any]:
         generate_report_meta = generate_report_wrapper.generate_report_metadata
         predictor = generate_report_wrapper.predictor
 
@@ -61,45 +45,24 @@ class GenerateWordCloudReportService(IGeneratingReportsService):
             categories=[category for category in generate_report_wrapper.model_metadata.category_mapping.values()],
         )
 
-        for source_name in generate_report_meta.channel_list:
-            try:
-                posts = datasource.fetch_data(
-                    source=DatasourceLink(
-                        source_link=source_name,
-                        offset_date=self._datetime_from_date(generate_report_meta.end_date, end_of_day=True),
-                        earliest_date=self._datetime_from_date(generate_report_meta.start_date),
-                        skip_messages_without_text=True,
-                    ),
-                )
-            except InvalidChannelURLError:
-                self._logger.warning(f"[GenerateWordCloudReportService] Invalid channel URL: {source_name}")
-                _data["warnings"].append(self.get_not_existing_source_channel_warning(source_name))
-                continue
+        for message in posts:
+            source_name = message.source_name
+            message_text_preprocessed = predictor.preprocess_text(message.text)
 
-            if not posts:
-                self._logger.warning(f"[GenerateWordCloudReportService] No messages from {source_name}")
-                _data["warnings"].append(self.get_not_existing_source_channel_warning(source_name))
-                continue
+            news_category = predictor.predict(message)
 
-            self._logger.info(f"[GenerateWordCloudReportService] Gathered {len(posts)} messages from {source_name}")
+            message_words = message_text_preprocessed.split()
+            words_counted = Counter(message_words)
 
-            for message in posts:
-                message_text_preprocessed = predictor.preprocess_text(message.text)
+            _data["total_words"] += len(message_words)
 
-                news_category = predictor.predict(message)
+            _data["total_words_frequency"].update(words_counted)
 
-                message_words = message_text_preprocessed.split()
-                words_counted = Counter(message_words)
+            _data["data_by_channel"][source_name].update(words_counted)
 
-                _data["total_words"] += len(message_words)
+            _data["data_by_category"][news_category].update(words_counted)
 
-                _data["total_words_frequency"].update(words_counted)
-
-                _data["data_by_channel"][source_name].update(words_counted)
-
-                _data["data_by_category"][news_category].update(words_counted)
-
-                _data["data_by_channel_by_category"][source_name][news_category].update(words_counted)
+            _data["data_by_channel_by_category"][source_name][news_category].update(words_counted)
 
         self._save_word_cloud_data_to_file(generate_report_meta.report_id, _data)
 
@@ -109,8 +72,25 @@ class GenerateWordCloudReportService(IGeneratingReportsService):
             "data_by_category": self._truncate_only_most_popular_words(_data["data_by_category"]),
             "data_by_channel": self._truncate_only_most_popular_words(_data["data_by_channel"]),
             "total_words_frequency": _data["total_words_frequency"].most_common(self._MAX_MOST_COMMON_WORDS),
-            "warnings": _data["warnings"],
         }
+
+    def build_report(
+        self,
+        handled_data: dict[str, Any],
+        generate_report_wrapper: GenerationTemplateWrapper,
+    ) -> WordCloudReport:
+        return (
+            WordCloudReportsBuilder.from_report_id(generate_report_wrapper.generate_report_metadata.report_id)
+            .set_posts_categories([category for category in generate_report_wrapper.model_metadata.category_mapping.values()])
+            .set_report_name(generate_report_wrapper.generate_report_metadata.name)
+            .set_total_words_count(handled_data["total_words"])
+            .set_data_by_category(handled_data["data_by_category"])
+            .set_data_by_channel(handled_data["data_by_channel"])
+            .set_total_words_frequency(handled_data["total_words_frequency"])
+            .set_data_by_channel_by_category(handled_data["data_by_channel_by_category"])
+            .set_report_warnings(self._report_generation_warnings)
+            .build()
+        )
 
     def _save_word_cloud_data_to_file(self, report_id: int, _data: dict[str, int]) -> None:
         tmp_file = tempfile.NamedTemporaryFile()

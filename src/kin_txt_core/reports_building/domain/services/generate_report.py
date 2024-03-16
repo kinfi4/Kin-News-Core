@@ -1,7 +1,10 @@
 import logging
+from typing import Any
 from abc import ABC, abstractmethod
 from datetime import date, datetime, timedelta
 
+from kin_txt_core.datasources.common.entities import ClassificationEntity, DatasourceLink
+from kin_txt_core.exceptions import InvalidChannelURLError
 from kin_txt_core.messaging import AbstractEventProducer
 from kin_txt_core.reports_building.domain.services.datasources.interface import IDataSourceFactory
 from kin_txt_core.reports_building.infrastructure.services import ModelTypesService
@@ -45,6 +48,8 @@ class IGeneratingReportsService(ABC):
         self._predictor_factory = predictor_factory
         self._datasource_factory = datasource_factory
 
+        self._report_generation_warnings = []
+
     def generate_report(self, generate_report_entity: GenerateReportEntity) -> None:
         username = generate_report_entity.username
 
@@ -79,8 +84,57 @@ class IGeneratingReportsService(ABC):
             postponed_report = self._build_postponed_report(generate_report_entity.report_id, generate_report_entity.name, error)
             self._publish_finished_report(username, postponed_report)
 
-    @abstractmethod
     def _build_report_entity(self, generate_report_wrapper: GenerationTemplateWrapper) -> StatisticalReport | WordCloudReport:
+        posts: list[ClassificationEntity] = self._gather_report_data(generate_report_wrapper)
+
+        handled_data = self.handle_posts(posts, generate_report_wrapper)
+
+        return self.build_report(handled_data, generate_report_wrapper)
+
+    def _gather_report_data(self, generate_report_wrapper: GenerationTemplateWrapper) -> list[ClassificationEntity]:
+        total_posts: list[ClassificationEntity] = []
+
+        datasource = self._datasource_factory.get_data_source(
+            generate_report_wrapper.generate_report_metadata.datasource_type
+        )
+        generate_report_meta = generate_report_wrapper.generate_report_metadata
+
+        for source_name in generate_report_meta.channel_list:
+            try:
+                source_posts = datasource.fetch_data(
+                    source=DatasourceLink(
+                        source_link=source_name,
+                        offset_date=self._datetime_from_date(generate_report_meta.end_date, end_of_day=True),
+                        earliest_date=self._datetime_from_date(generate_report_meta.start_date),
+                        skip_messages_without_text=True,
+                    ),
+                )
+
+                total_posts.extend(source_posts)  # Append all posts from the source to the total list
+            except InvalidChannelURLError:
+                self._logger.warning(f"[BuildWordCloudReportStrategy] Invalid channel URL: {source_name}")
+                self._report_generation_warnings.append(self.get_not_existing_source_channel_warning(source_name))
+                continue
+
+            if not source_posts:
+                self._logger.warning(f"[BuildWordCloudReportStrategy] No messages from {source_name}")
+                self._report_generation_warnings.append(self.get_not_existing_source_channel_warning(source_name))
+                continue
+
+            self._logger.info(f"[BuildWordCloudReportStrategy] Gathered {len(source_posts)} messages from {source_name}")
+
+        return total_posts
+
+    @abstractmethod
+    def handle_posts(self, posts: list[ClassificationEntity], generate_report_wrapper: GenerationTemplateWrapper) -> dict[str, Any]:
+        pass
+
+    @abstractmethod
+    def build_report(
+        self,
+        handled_data: dict[str, Any],
+        generate_report_wrapper: GenerationTemplateWrapper,
+    ) -> StatisticalReport | WordCloudReport:
         pass
 
     def _load_visualization_template(self, gen_request: GenerateReportEntity) -> VisualizationTemplate | None:

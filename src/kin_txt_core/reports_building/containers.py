@@ -109,7 +109,7 @@ class DomainServices(containers.DeclarativeContainer):
         model_types_service=services.model_types_service,
     )
 
-    generate_statistics_report_service: providers.Singleton[GenerateStatisticalReportService] = providers.Singleton(
+    generate_statistics_report_service: providers.Factory[GenerateStatisticalReportService] = providers.Factory(
         GenerateStatisticalReportService,
         events_producer=messaging.producer,
         statistics_service=services.statistics_service,
@@ -118,7 +118,7 @@ class DomainServices(containers.DeclarativeContainer):
         datasource_factory=factories.datasource_factory,
     )
 
-    generate_word_cloud_report_service: providers.Singleton[GenerateWordCloudReportService] = providers.Singleton(
+    generate_word_cloud_report_service: providers.Factory[GenerateWordCloudReportService] = providers.Factory(
         GenerateWordCloudReportService,
         events_producer=messaging.producer,
         statistics_service=services.statistics_service,
