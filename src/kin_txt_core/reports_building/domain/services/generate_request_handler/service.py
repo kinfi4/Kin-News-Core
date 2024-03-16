@@ -36,7 +36,7 @@ class GenerateRequestHandlerService:
         target_task(event)
 
     def _get_task_from_event(self, event: GenerateReportRequestOccurred) -> Callable[..., None]:
-        if event.report_type == ReportTypes.WORD_CLOUD and event.classification_scope == ClassificationScopes.ENTIRE_POST:
+        if event.report_type == ReportTypes.WORD_CLOUD and event.classification_scope == ClassificationScopes.TOKENS:
             return self.generate_word_cloud_for_token_classification_task
 
         if event.report_type == ReportTypes.WORD_CLOUD:

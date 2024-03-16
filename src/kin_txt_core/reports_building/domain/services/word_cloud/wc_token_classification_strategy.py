@@ -20,7 +20,7 @@ class BuildWordCloudTokenClassificationStrategy(WordCloudStrategy):
         )
 
         for message in posts:
-            source_name = message.source_name
+            source_name = message.source_link
 
             words_to_category_mapping: dict[str, list[str]] = predictor.predict_post_tokens(message)
 
@@ -28,7 +28,7 @@ class BuildWordCloudTokenClassificationStrategy(WordCloudStrategy):
                 if not category:  # usually if category is not recognized it's empty
                     continue
 
-                _data["total_words"] += 1  # for each token was recognized
+                _data["total_words"] += len(word_list)  # for each token was recognized
 
                 _data["total_words_frequency"].update(word_list)
 

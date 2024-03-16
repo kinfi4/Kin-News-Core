@@ -51,7 +51,7 @@ class RedditDatasource(IDataSource):
             raise
 
         return [
-            ClassificationEntity.from_reddit_submission(post) for post in posts
+            ClassificationEntity.from_reddit_submission(source.source_link, post) for post in posts
         ]
 
     def _get_posts(self, subreddit: Subreddit, settings: DatasourceLink) -> Iterator[Submission]:
