@@ -10,7 +10,7 @@ from kin_txt_core.reports_building.constants import (
 from kin_txt_core.reports_building.domain.entities.reports import DataByCategory, DataByDateChannelCategory
 
 
-class ReportsBuilder:
+class StatisticalReportsBuilder:
     def __init__(
         self,
         report_id: int,

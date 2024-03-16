@@ -17,12 +17,12 @@ from kin_txt_core.reports_building.domain.entities import (
 )
 from kin_txt_core.reports_building.domain.entities.generation_template_wrapper import GenerationTemplateWrapper
 from kin_txt_core.reports_building.domain.services.generate_report import IGeneratingReportsService
-from kin_txt_core.reports_building.domain.services.statistical_report.reports_builder import ReportsBuilder
+from kin_txt_core.reports_building.domain.services.statistical_report.reports_builder import StatisticalReportsBuilder
 from kin_txt_core.reports_building.infrastructure.services import StatisticsService, ModelTypesService
 
 
 class GenerateStatisticalReportService(IGeneratingReportsService):
-    reports_builder = ReportsBuilder
+    reports_builder = StatisticalReportsBuilder
 
     def __init__(
         self,
@@ -49,7 +49,7 @@ class GenerateStatisticalReportService(IGeneratingReportsService):
             self._save_data_to_file(generate_report_entity.generate_report_metadata.report_id, user_report_file)
 
         return (
-            ReportsBuilder.from_report_id(generate_report_entity.generate_report_metadata.report_id)
+            StatisticalReportsBuilder.from_report_id(generate_report_entity.generate_report_metadata.report_id)
             .set_visualization_diagrams_list(generate_report_entity.visualization_template.visualization_diagram_types)
             .set_posts_categories([category for category in generate_report_entity.model_metadata.category_mapping.values()])
             .set_report_name(generate_report_entity.generate_report_metadata.name)

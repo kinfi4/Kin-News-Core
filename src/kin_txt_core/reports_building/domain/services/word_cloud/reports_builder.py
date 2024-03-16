@@ -9,7 +9,7 @@ from kin_txt_core.reports_building.constants import (
 )
 
 
-class WordCloudReportBuilder:
+class WordCloudReportsBuilder:
     def __init__(self, report_id: int) -> None:
         self._report_name = ""
         self._report_id = report_id

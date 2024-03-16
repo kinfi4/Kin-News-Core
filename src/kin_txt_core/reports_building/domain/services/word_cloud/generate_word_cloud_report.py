@@ -12,14 +12,14 @@ from kin_txt_core.reports_building.domain.services.datasources.interface import 
 from kin_txt_core.reports_building.domain.services.generate_report import IGeneratingReportsService
 from kin_txt_core.reports_building.domain.services.predicting.predictor import IPredictorFactory
 from kin_txt_core.reports_building.domain.services.word_cloud.reports_builder import (
-    WordCloudReportBuilder,
+    WordCloudReportsBuilder,
 )
 from kin_txt_core.reports_building.infrastructure.services import StatisticsService, ModelTypesService
 
 
 class GenerateWordCloudReportService(IGeneratingReportsService):
     _MAX_MOST_COMMON_WORDS = 450
-    reports_builder = WordCloudReportBuilder
+    reports_builder = WordCloudReportsBuilder
 
     def __init__(
         self,
@@ -36,7 +36,7 @@ class GenerateWordCloudReportService(IGeneratingReportsService):
         gathered_results = self.__gather_data(generate_report_wrapper)
 
         return (
-            WordCloudReportBuilder.from_report_id(generate_report_wrapper.generate_report_metadata.report_id)
+            WordCloudReportsBuilder.from_report_id(generate_report_wrapper.generate_report_metadata.report_id)
             .set_posts_categories([category for category in generate_report_wrapper.model_metadata.category_mapping.values()])
             .set_report_name(generate_report_wrapper.generate_report_metadata.name)
             .set_total_words_count(gathered_results["total_words"])
