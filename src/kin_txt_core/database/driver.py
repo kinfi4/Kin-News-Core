@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from typing import Generator, Optional
 
 from sqlalchemy.engine import Engine, Connection, create_engine
+from sqlalchemy.orm import Session
 
 
 class Database:
@@ -42,6 +43,21 @@ class Database:
         except Exception:
             transaction.rollback()
             raise
+
+    @contextmanager
+    def session(self) -> Generator[Session, None, None]:
+        connection = self.get_db_connection()
+
+        session = Session(bind=connection)
+        transaction = session.begin()
+        try:
+            yield session
+            transaction.commit()
+        except Exception:
+            transaction.rollback()
+            raise
+        finally:
+            session.close()
 
     def get_db_connection(self) -> Connection:
         try:
