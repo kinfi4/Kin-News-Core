@@ -65,7 +65,7 @@ class StatisticalStrategy(IGeneratingReportsService):
         _data = self._initialize_report_data_dict(generate_report_wrapper)
         
         for message in posts:
-            source_name = message.source_name
+            source_name = message.source_link
             message_date_str = message.created_at.date().strftime(DEFAULT_DATE_FORMAT)
             message_hour = message.created_at.hour
 

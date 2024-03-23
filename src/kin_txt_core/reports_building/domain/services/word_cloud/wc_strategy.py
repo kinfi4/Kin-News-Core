@@ -45,7 +45,7 @@ class WordCloudStrategy(IGeneratingReportsService):
         )
 
         for message in posts:
-            source_name = message.source_name
+            source_name = message.source_link
             message_text_preprocessed = predictor.preprocess_text(message.text)
 
             category = predictor.predict_post(message)

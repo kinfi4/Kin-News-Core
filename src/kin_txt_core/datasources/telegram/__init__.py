@@ -1,3 +1,2 @@
-from .interfaces import IDataGetterProxy
 from .client import TelegramDatasource
-from .entities import TelegramMessageEntity, TelegramChannelEntity
+from .entities import TelegramChannelEntity

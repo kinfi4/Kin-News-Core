@@ -13,15 +13,14 @@ from kin_txt_core.datasources.common.entities import DatasourceLink, Classificat
 from kin_txt_core.datasources.common.interface import IDataSource
 from kin_txt_core.datasources.settings import TelegramSettings
 from kin_txt_core.exceptions import InvalidChannelURLError, TelegramIsUnavailable
-from kin_txt_core.datasources.telegram.entities import TelegramMessageEntity, TelegramChannelEntity
+from kin_txt_core.datasources.telegram.entities import TelegramChannelEntity
 from kin_txt_core.constants import MESSAGES_LIMIT_FOR_ONE_CALL
-from kin_txt_core.datasources.telegram.interfaces import IDataGetterProxy
 from kin_txt_core.datasources.telegram.retry import retry_connection_async, retry_connection_sync
 
 logging.getLogger("telethon").setLevel(logging.ERROR)
 
 
-class TelegramDatasource(IDataGetterProxy, IDataSource):
+class TelegramDatasource(IDataSource):
     def __init__(self, session_str: str, api_id: int, api_hash: str) -> None:
         self._session_obj = StringSession(session_str)
         self._api_id = api_id
@@ -31,16 +30,14 @@ class TelegramDatasource(IDataGetterProxy, IDataSource):
         self._logger = logging.getLogger(self.__class__.__name__)
 
     def fetch_data(self, source: DatasourceLink) -> list[ClassificationEntity]:
-        messages: list[TelegramMessageEntity] = self.fetch_posts_from_channel(
+        messages: list[ClassificationEntity] = self.fetch_posts_from_channel(
             source.source_link,
             offset_date=source.offset_date,
             earliest_date=source.earliest_date,
             skip_messages_without_text=source.skip_messages_without_text,
         )
 
-        return [
-            ClassificationEntity.from_tg_message_entity(message) for message in messages
-        ]
+        return messages
 
     @retry_connection_sync
     def fetch_posts_from_channel(
@@ -50,7 +47,7 @@ class TelegramDatasource(IDataGetterProxy, IDataSource):
         offset_date: Optional[datetime] = None,
         earliest_date: Optional[datetime] = None,
         skip_messages_without_text: bool = False,
-    ) -> list[TelegramMessageEntity]:
+    ) -> list[ClassificationEntity]:
         with self._client:
             try:
                 return self._client.loop.run_until_complete(
@@ -74,13 +71,6 @@ class TelegramDatasource(IDataGetterProxy, IDataSource):
                 self.get_channel_async(channel_link)
             )
 
-    @retry_connection_sync
-    def download_channel_profile_photo(self, channel_link: str, path_to_save: str) -> None:
-        with self._client:
-            self._client.loop.run_until_complete(self.download_channel_profile_photo_async(
-                channel_link, path_to_save
-            ))
-
     @retry_connection_async
     async def fetch_posts_from_channel_async(
         self,
@@ -89,7 +79,7 @@ class TelegramDatasource(IDataGetterProxy, IDataSource):
         offset_date: Optional[datetime] = None,
         earliest_date: Optional[datetime] = None,
         skip_messages_without_text: bool = False,
-    ) -> list[TelegramMessageEntity]:
+    ) -> list[ClassificationEntity]:
         self._logger.info(f"[TelegramProxy] Fetching data from {channel_name}")
 
         channel_entity: TelegramChannelEntity = await self.get_channel_async(channel_name)
@@ -123,7 +113,7 @@ class TelegramDatasource(IDataGetterProxy, IDataSource):
                 messages_to_return.append(message)
                 previous_message = message
 
-        return [TelegramMessageEntity.from_telegram_obj(msg) for msg in messages_to_return]
+        return [ClassificationEntity.from_tg_message(channel_name, msg) for msg in messages_to_return]
 
     @retry_connection_async
     async def get_channel_async(self, channel_link: str) -> TelegramChannelEntity:
@@ -139,15 +129,6 @@ class TelegramDatasource(IDataGetterProxy, IDataSource):
             channel_full_obj.full_chat.about,
             channel_full_obj.full_chat.participants_count,
         )
-
-    @retry_connection_async
-    async def download_channel_profile_photo_async(self, channel_link: str, path_to_save: str) -> None:
-        try:
-            async with self._client:
-                await self._client.download_profile_photo(channel_link, file=path_to_save)
-        except ValueError as err:
-            self._logger.warning(f"Impossible to find channel for {channel_link}, with error: {str(err)}")
-            raise InvalidChannelURLError(f"Channel link {channel_link} is invalid, or channel with this name does not exists")
 
     def _initialize_client(self) -> TelegramClient:
         loop = asyncio.new_event_loop()
