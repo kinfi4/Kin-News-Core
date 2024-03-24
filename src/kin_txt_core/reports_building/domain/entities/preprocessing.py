@@ -28,4 +28,4 @@ class PreprocessingConfig(BaseModel):
     padding: PossiblePaddingTruncating = Field(default=PossiblePaddingTruncating.PRE, alias="padding")
     truncating: PossiblePaddingTruncating = Field(default=PossiblePaddingTruncating.PRE, alias="truncating")
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, from_attributes=True)

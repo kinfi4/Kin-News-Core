@@ -9,6 +9,8 @@ class PostgresSettings(BaseSettings):
     user: str = Field(..., validation_alias="DATABASE_USER")
     password: str = Field(..., validation_alias="DATABASE_PASSWORD")
 
+    db_schema: str = Field("public", validation_alias="DATABASE_SCHEMA")
+
 
 class AuthSettings(BaseSettings):
     secret_key: str = Field(..., validation_alias="SECRET_KEY")

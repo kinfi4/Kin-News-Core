@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from typing import Generator, Optional
 
 from sqlalchemy.engine import Engine, Connection, create_engine
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker, scoped_session
 
 
 class Database:
@@ -25,11 +25,13 @@ class Database:
         self._connection: Optional[Connection] = None
         self._connection_registry = threading.local()
 
-    def _build_connection_string(self) -> str:
+        self._session_factory = sessionmaker(bind=self._create_engine(), expire_on_commit=False)
+
+    def build_connection_string(self) -> str:
         return f"postgresql+psycopg2://{self._username}:{self._password}@{self._host}:{self._port}/{self._db_name}"
 
     def _create_engine(self) -> Engine:
-        connection_string = self._build_connection_string()
+        connection_string = self.build_connection_string()
         return create_engine(connection_string)
 
     @contextmanager
@@ -46,18 +48,17 @@ class Database:
 
     @contextmanager
     def session(self) -> Generator[Session, None, None]:
-        connection = self.get_db_connection()
+        _Session = scoped_session(self._session_factory)
+        session = _Session()
 
-        session = Session(bind=connection)
-        transaction = session.begin()
         try:
             yield session
-            transaction.commit()
+            session.commit()
         except Exception:
-            transaction.rollback()
+            session.rollback()
             raise
         finally:
-            session.close()
+            _Session.remove()
 
     def get_db_connection(self) -> Connection:
         try:
