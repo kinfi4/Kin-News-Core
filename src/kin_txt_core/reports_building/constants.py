@@ -1,6 +1,6 @@
 from enum import Enum
 
-REPORTS_BUILDER_EXCHANGE = "StatisticalReportsBuilder"
+REPORTS_BUILDER_EXCHANGE = "ReportsBuilder"
 REPORTS_STORING_EXCHANGE = "ReportsStoring"
 MODEL_TYPES_EXCHANGE = "ModelTypes"
 
