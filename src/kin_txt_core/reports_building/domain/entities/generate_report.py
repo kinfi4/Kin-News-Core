@@ -19,7 +19,7 @@ class GenerateReportEntity(BaseModel):
     username: str
     report_id: int
     model_code: str
-    template_id: str
+    template_id: int | None = None
     start_date: date
     end_date: date
     channel_list: list[str]

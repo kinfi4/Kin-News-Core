@@ -21,15 +21,11 @@ class ModelTypesService(ServiceProxy):
         target_url = f"{self._base_url}/blobs/get-tokenizer-binaries/{model_code}"
         return self._make_get_request(username=username, target_url=target_url)
 
-    def get_visualization_template(self, username: str, template_id: str) -> dict:
-        target_url = f"{self._base_url}/blobs/visualization-template/{template_id}"
-        return self._make_get_request(username=username, target_url=target_url)
-
     def get_model_metadata(self, username: str, model_code: str) -> dict:
         target_url = f"{self._base_url}/models/{model_code}"
         return self._make_get_request(username=username, target_url=target_url)
 
-    def get_visualization_templates(self, username: str, template_id: str) -> dict:
+    def get_visualization_templates(self, username: str, template_id: int) -> dict:
         target_url = f"{self._base_url}/visualization-template/{template_id}"
         return self._make_get_request(username=username, target_url=target_url)
 
