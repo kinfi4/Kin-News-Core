@@ -6,7 +6,7 @@ from praw.models import Submission
 from telethon.tl.custom.message import Message
 
 
-@dataclass
+@dataclass(slots=True)
 class ClassificationEntity:
     text: str | None
     created_at: datetime | None = None
@@ -31,7 +31,7 @@ class ClassificationEntity:
         )
 
 
-@dataclass
+@dataclass(slots=True)
 class DatasourceLink:
     source_link: str
     offset_date: datetime | None = None
