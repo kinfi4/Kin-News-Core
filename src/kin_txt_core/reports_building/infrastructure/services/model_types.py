@@ -13,14 +13,6 @@ class ModelTypesService(ServiceProxy):
         super().__init__(jwt_token=jwt_token, kin_token=kin_token)
         self._base_url = url
 
-    def get_model_binaries(self, username: str, model_code: str) -> bytes:
-        target_url = f"{self._base_url}/blobs/get-model-binaries/{model_code}"
-        return self._make_get_request(username=username, target_url=target_url)
-
-    def get_tokenizer_binaries(self, username: str, model_code: str) -> bytes:
-        target_url = f"{self._base_url}/blobs/get-tokenizer-binaries/{model_code}"
-        return self._make_get_request(username=username, target_url=target_url)
-
     def get_model_metadata(self, username: str, model_code: str) -> dict:
         target_url = f"{self._base_url}/models/{model_code}"
         return self._make_get_request(username=username, target_url=target_url)
@@ -28,12 +20,6 @@ class ModelTypesService(ServiceProxy):
     def get_visualization_templates(self, username: str, template_id: int) -> dict:
         target_url = f"{self._base_url}/visualization-template/{template_id}"
         return self._make_get_request(username=username, target_url=target_url)
-
-    def register_model_type(self, model: CustomModelRegistrationEntity) -> dict[str, Any]:
-        data = model.dict(by_alias=True)
-        target_url = f"{self._base_url}/models/register"
-
-        return self._make_post_request(username=model.owner_username, target_url=target_url, data=data)
 
     def _make_get_request(self, username: str, target_url: str) -> dict | bytes:
         self._session.headers.update({USERNAME_HEADER: username})

@@ -109,7 +109,7 @@ class DomainServices(containers.DeclarativeContainer):
     model_type_registration_service: providers.Singleton[ModelTypeRegistrationService] = providers.Singleton(
         ModelTypeRegistrationService,
         predictor_factory=predictor_factory,
-        model_types_service=services.model_types_service,
+        events_producer=messaging.producer,
     )
 
     statistical_report_service: providers.Factory[StatisticalStrategy] = providers.Factory(

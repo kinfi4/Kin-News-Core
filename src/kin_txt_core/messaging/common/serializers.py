@@ -9,6 +9,8 @@ from kin_txt_core.constants import DEFAULT_DATE_FORMAT, DEFAULT_DATETIME_FORMAT
 
 
 class JsonSerializer(IDeserializer, ISerializer):
+    # TODO: Rewrite this class to use Pydantic's JSON serialization/deserialization
+
     def deserialize(self, event_class: Type[BasicEvent], data: bytes) -> BasicEvent:
         return event_class(**json.loads(data.decode()))
 

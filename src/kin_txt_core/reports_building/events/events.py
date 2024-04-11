@@ -1,7 +1,13 @@
 from kin_txt_core.messaging.dtos.event import BasicEvent
 
-from kin_txt_core.reports_building.domain.entities import StatisticalReport, WordCloudReport, GenerateReportEntity, \
-    BaseReport, ModelEntity
+from kin_txt_core.reports_building.domain.entities import (
+    StatisticalReport,
+    WordCloudReport,
+    GenerateReportEntity,
+    BaseReport,
+    ModelEntity,
+    CustomModelRegistrationEntity,
+)
 
 
 class GenerateReportRequestOccurred(BasicEvent, GenerateReportEntity):
@@ -38,3 +44,7 @@ class ModelValidationFinished(BasicEvent):
     username: str
     validation_passed: bool
     message: str | None = None
+
+
+class ReportsBuilderCreated(BasicEvent, CustomModelRegistrationEntity):
+    pass
